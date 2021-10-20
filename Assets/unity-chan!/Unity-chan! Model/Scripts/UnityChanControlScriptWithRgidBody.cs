@@ -21,7 +21,10 @@ namespace UnityChan
         public bool useCurves = true;               // Mecanimでカーブ調整を使うか設定する
                                                     // このスイッチが入っていないとカーブは使われない
         public float useCurvesHeight = 0.5f;        // カーブ補正の有効高さ（地面をすり抜けやすい時には大きくする）
-        PauseMenuController _pauseMenu = default;
+        PauseMenuController _pauseMenu = default;   //一時停止の命令を取得する
+        Vector3 stopvelo = default;                 //停止する直前の速度を取得する
+        //public bool pauseupdate = false;             //停止した際に動かないようにするため
+        public bool pauseresum = false;
 
         // 以下キャラクターコントローラ用パラメタ
         // 前進速度
@@ -51,11 +54,6 @@ namespace UnityChan
         static int jumpState = Animator.StringToHash("Base Layer.Jump");
         static int restState = Animator.StringToHash("Base Layer.Rest");
 
-        private void Awake()
-        {
-            _pauseMenu = GetComponent<PauseMenuController>();
-        }
-
         // 初期化
         void Start()
         {
@@ -84,143 +82,147 @@ namespace UnityChan
             rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
 
 
-
-            //// 以下、キャラクターの移動処理
-            //velocity = new Vector3(0, 0, v);        // 上下のキー入力からZ軸方向の移動量を取得
-            //                                        // キャラクターのローカル空間での方向に変換
-            //velocity = transform.TransformDirection(velocity);
-            ////以下のvの閾値は、Mecanim側のトランジションと一緒に調整する
-            //if (v > 0.1)
-            //{
-            //    velocity *= forwardSpeed;       // 移動速度を掛ける
-            //}
-            //else if (v < -0.1)
-            //{
-            //    velocity *= backwardSpeed;  // 移動速度を掛ける
-            //}
-            Vector3 dir = Vector3.forward * v + Vector3.right * h;
-
-            if (dir == Vector3.zero)
+            if (!pauseresum)
             {
-                anim.SetBool("run", false);
-                rb.velocity = new Vector3(0f, rb.velocity.y, 0f);// 方向の入力がニュートラルの時は、y 軸方向の速度を保持する
-            }
-            else
-            {
-                anim.SetBool("run",true);
-                // カメラを基準に入力が上下=奥/手前, 左右=左右にキャラクターを向ける
-                dir = Camera.main.transform.TransformDirection(dir);    // メインカメラを基準に入力方向のベクトルを変換する
-                dir.y = 0;  // y 軸方向はゼロにして水平方向のベクトルにする
-                            // 入力方向に滑らかに回転させる
-                Quaternion targetRotation = Quaternion.LookRotation(dir);
-                this.transform.rotation = Quaternion.Slerp(this.transform.rotation, targetRotation, Time.deltaTime *  rotateSpeed);
+                //// 以下、キャラクターの移動処理
+                //velocity = new Vector3(0, 0, v);        // 上下のキー入力からZ軸方向の移動量を取得
+                //                                        // キャラクターのローカル空間での方向に変換
+                //velocity = transform.TransformDirection(velocity);
+                ////以下のvの閾値は、Mecanim側のトランジションと一緒に調整する
+                //if (v > 0.1)
+                //{
+                //    velocity *= forwardSpeed;       // 移動速度を掛ける
+                //}
+                //else if (v < -0.1)
+                //{
+                //    velocity *= backwardSpeed;  // 移動速度を掛ける
+                //}
+                Vector3 dir = Vector3.forward * v + Vector3.right * h;
 
-                Vector3 velo = dir.normalized * forwardSpeed; // 入力した方向に移動する
-                velo.y = rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
-                rb.velocity = velo;   // 計算した速度ベクトルをセットする
-            }
-
-            //if (Input.GetButtonDown("Jump"))
-            //{   // スペースキーを入力したら
-
-            //    //アニメーションのステートがLocomotionの最中のみジャンプできる
-            //    if (currentBaseState.nameHash == locoState)
-            //    {
-            //        //ステート遷移中でなかったらジャンプできる
-            //        if (!anim.IsInTransition(0))
-            //        {
-            //            rb.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
-            //            anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
-            //        }
-            //    }
-            //}
-
-
-            //// 上下のキー入力でキャラクターを移動させる
-            //transform.localPosition += velocity * Time.fixedDeltaTime;
-
-            //// 左右のキー入力でキャラクタをY軸で旋回させる
-            //transform.Rotate(0, h * rotateSpeed, 0);
-
-
-            // 以下、Animatorの各ステート中での処理
-            // Locomotion中
-            // 現在のベースレイヤーがlocoStateの時
-            if (currentBaseState.nameHash == locoState)
-            {
-                //カーブでコライダ調整をしている時は、念のためにリセットする
-                if (useCurves)
+                if (dir == Vector3.zero)
                 {
-                    resetCollider();
+                    anim.SetBool("run", false);
+                    rb.velocity = new Vector3(0f, rb.velocity.y, 0f);// 方向の入力がニュートラルの時は、y 軸方向の速度を保持する
                 }
-            }
-            // JUMP中の処理
-            // 現在のベースレイヤーがjumpStateの時
-            else if (currentBaseState.nameHash == jumpState)
-            {
-                cameraObject.SendMessage("setCameraPositionJumpView");  // ジャンプ中のカメラに変更
-                                                                        // ステートがトランジション中でない場合
-                if (!anim.IsInTransition(0))
+                else
                 {
+                    anim.SetBool("run", true);
+                    // カメラを基準に入力が上下=奥/手前, 左右=左右にキャラクターを向ける
+                    dir = Camera.main.transform.TransformDirection(dir);    // メインカメラを基準に入力方向のベクトルを変換する
+                    dir.y = 0;  // y 軸方向はゼロにして水平方向のベクトルにする
+                                // 入力方向に滑らかに回転させる
+                    Quaternion targetRotation = Quaternion.LookRotation(dir);
+                    this.transform.rotation = Quaternion.Slerp(this.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
 
-                    // 以下、カーブ調整をする場合の処理
+                    Vector3 velo = dir.normalized * forwardSpeed; // 入力した方向に移動する
+                    velo.y = rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
+                    rb.velocity = velo;   // 計算した速度ベクトルをセットする
+                }
+
+                //if (Input.GetButtonDown("Jump"))
+                //{   // スペースキーを入力したら
+
+                //    //アニメーションのステートがLocomotionの最中のみジャンプできる
+                //    if (currentBaseState.nameHash == locoState)
+                //    {
+                //        //ステート遷移中でなかったらジャンプできる
+                //        if (!anim.IsInTransition(0))
+                //        {
+                //            rb.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
+                //            anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
+                //        }
+                //    }
+                //}
+
+
+                //// 上下のキー入力でキャラクターを移動させる
+                //transform.localPosition += velocity * Time.fixedDeltaTime;
+
+                //// 左右のキー入力でキャラクタをY軸で旋回させる
+                //transform.Rotate(0, h * rotateSpeed, 0);
+
+
+                // 以下、Animatorの各ステート中での処理
+                // Locomotion中
+                // 現在のベースレイヤーがlocoStateの時
+                if (currentBaseState.nameHash == locoState)
+                {
+                    //カーブでコライダ調整をしている時は、念のためにリセットする
                     if (useCurves)
                     {
-                        // 以下JUMP00アニメーションについているカーブJumpHeightとGravityControl
-                        // JumpHeight:JUMP00でのジャンプの高さ（0〜1）
-                        // GravityControl:1⇒ジャンプ中（重力無効）、0⇒重力有効
-                        float jumpHeight = anim.GetFloat("JumpHeight");
-                        float gravityControl = anim.GetFloat("GravityControl");
-                        if (gravityControl > 0)
-                            rb.useGravity = false;  //ジャンプ中の重力の影響を切る
+                        resetCollider();
+                    }
+                }
+                // JUMP中の処理
+                // 現在のベースレイヤーがjumpStateの時
+                else if (currentBaseState.nameHash == jumpState)
+                {
+                    cameraObject.SendMessage("setCameraPositionJumpView");  // ジャンプ中のカメラに変更
+                                                                            // ステートがトランジション中でない場合
+                    if (!anim.IsInTransition(0))
+                    {
 
-                        // レイキャストをキャラクターのセンターから落とす
-                        Ray ray = new Ray(transform.position + Vector3.up, -Vector3.up);
-                        RaycastHit hitInfo = new RaycastHit();
-                        // 高さが useCurvesHeight 以上ある時のみ、コライダーの高さと中心をJUMP00アニメーションについているカーブで調整する
-                        if (Physics.Raycast(ray, out hitInfo))
+                        // 以下、カーブ調整をする場合の処理
+                        if (useCurves)
                         {
-                            if (hitInfo.distance > useCurvesHeight)
+                            // 以下JUMP00アニメーションについているカーブJumpHeightとGravityControl
+                            // JumpHeight:JUMP00でのジャンプの高さ（0〜1）
+                            // GravityControl:1⇒ジャンプ中（重力無効）、0⇒重力有効
+                            float jumpHeight = anim.GetFloat("JumpHeight");
+                            float gravityControl = anim.GetFloat("GravityControl");
+                            if (gravityControl > 0)
+                                rb.useGravity = false;  //ジャンプ中の重力の影響を切る
+
+                            // レイキャストをキャラクターのセンターから落とす
+                            Ray ray = new Ray(transform.position + Vector3.up, -Vector3.up);
+                            RaycastHit hitInfo = new RaycastHit();
+                            // 高さが useCurvesHeight 以上ある時のみ、コライダーの高さと中心をJUMP00アニメーションについているカーブで調整する
+                            if (Physics.Raycast(ray, out hitInfo))
                             {
-                                col.height = orgColHight - jumpHeight;          // 調整されたコライダーの高さ
-                                float adjCenterY = orgVectColCenter.y + jumpHeight;
-                                col.center = new Vector3(0, adjCenterY, 0); // 調整されたコライダーのセンター
-                            }
-                            else
-                            {
-                                // 閾値よりも低い時には初期値に戻す（念のため）					
-                                resetCollider();
+                                if (hitInfo.distance > useCurvesHeight)
+                                {
+                                    col.height = orgColHight - jumpHeight;          // 調整されたコライダーの高さ
+                                    float adjCenterY = orgVectColCenter.y + jumpHeight;
+                                    col.center = new Vector3(0, adjCenterY, 0); // 調整されたコライダーのセンター
+                                }
+                                else
+                                {
+                                    // 閾値よりも低い時には初期値に戻す（念のため）					
+                                    resetCollider();
+                                }
                             }
                         }
+                        // Jump bool値をリセットする（ループしないようにする）				
+                        anim.SetBool("Jump", false);
                     }
-                    // Jump bool値をリセットする（ループしないようにする）				
-                    anim.SetBool("Jump", false);
+
                 }
-            }
-            // IDLE中の処理
-            // 現在のベースレイヤーがidleStateの時
-            else if (currentBaseState.nameHash == idleState)
-            {
-                //カーブでコライダ調整をしている時は、念のためにリセットする
-                if (useCurves)
+
+                // IDLE中の処理
+                // 現在のベースレイヤーがidleStateの時
+                else if (currentBaseState.nameHash == idleState)
                 {
-                    resetCollider();
+                    //カーブでコライダ調整をしている時は、念のためにリセットする
+                    if (useCurves)
+                    {
+                        resetCollider();
+                    }
+                    // スペースキーを入力したらRest状態になる
+                    if (Input.GetButtonDown("Jump"))
+                    {
+                        anim.SetBool("Rest", true);
+                    }
                 }
-                // スペースキーを入力したらRest状態になる
-                if (Input.GetButtonDown("Jump"))
+                // REST中の処理
+                // 現在のベースレイヤーがrestStateの時
+                else if (currentBaseState.nameHash == restState)
                 {
-                    anim.SetBool("Rest", true);
-                }
-            }
-            // REST中の処理
-            // 現在のベースレイヤーがrestStateの時
-            else if (currentBaseState.nameHash == restState)
-            {
-                //cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
-                // ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
-                if (!anim.IsInTransition(0))
-                {
-                    anim.SetBool("Rest", false);
+                    //cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
+                    // ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
+                    if (!anim.IsInTransition(0))
+                    {
+                        anim.SetBool("Rest", false);
+                    }
                 }
             }
         }
@@ -244,5 +246,61 @@ namespace UnityChan
             col.height = orgColHight;
             col.center = orgVectColCenter;
         }
+        
+        private void Awake()　// この処理は Start やると遅いので Awake でやっている
+        {
+            _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
+        }
+
+        private void OnEnable()　//ゲームに入ると加わる
+        {
+            _pauseMenu.onCommandMenu += PauseCommand;
+            //_pauseMenu.offCommandMenu += ResumCommand;
+        }
+
+        private void OnDisable() //消えると抜ける
+        {
+            _pauseMenu.onCommandMenu -= PauseCommand;
+            //_pauseMenu.offCommandMenu -= ResumCommand;
+        }
+
+        void PauseCommand(bool onPause) 
+        {
+            if (onPause)
+            {
+                Pause();
+                pauseresum = true;
+            }
+            else
+            {
+                Resum();
+                pauseresum = false;
+            }
+        }
+
+        //void ResumCommand(bool onResum)
+        //{
+        //    if (onResum && pauseresum)
+        //    {
+        //        Debug.Log("a");
+        //        Resum();
+        //        pauseresum = false;
+        //    }
+        //}
+
+        void Pause() //停止処理
+        {
+            stopvelo = rb.velocity;
+            rb.velocity = Vector3.zero;
+            anim.enabled = false;
+
+        }
+
+        void Resum() //再開
+        {
+            rb.velocity = stopvelo;
+            anim.enabled = true;
+        }
+
     }
 }
