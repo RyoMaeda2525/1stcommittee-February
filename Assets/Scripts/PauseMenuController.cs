@@ -7,6 +7,7 @@ public class PauseMenuController : MonoBehaviour
 {
     static bool _commandPause = false;
     static bool _commandResum = false;
+    [SerializeField] GameObject commandPanel = default;//コマンドを出すパネル
     public event Action<bool> onCommandMenu;
     public event Action<bool> offCommandMenu;
 
@@ -33,8 +34,19 @@ public class PauseMenuController : MonoBehaviour
 
     void OnCommandMenu()
     {
-        _commandPause = !_commandPause;
-        onCommandMenu(_commandPause);  // これで変数に代入した関数を全て呼び出せる
+        if (!_commandPause)
+        {
+            commandPanel.SetActive(true);
+            _commandPause = true;
+            onCommandMenu(_commandPause);  // これで変数に代入した関数を全て呼び出せる
+        }
+        else
+        {       
+            commandPanel.SetActive(false);
+            _commandPause = false;
+            onCommandMenu(_commandPause);  // これで変数に代入した関数を全て呼び出せる
+        }
+        
         //_commandResum = false;
         //onCommandMenu(_commandResum);
     }
