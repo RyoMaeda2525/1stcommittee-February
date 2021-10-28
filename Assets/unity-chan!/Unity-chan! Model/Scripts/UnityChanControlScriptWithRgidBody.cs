@@ -5,6 +5,7 @@
 //
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace UnityChan
 {
@@ -25,6 +26,7 @@ namespace UnityChan
         Vector3 stopvelo = default;                 //停止する直前の速度を取得する
         //public bool pauseupdate = false;             //停止した際に動かないようにするため
         public bool pauseresum = false;
+        public List<GameObject> enemyList = new List<GameObject>();
 
         // 以下キャラクターコントローラ用パラメタ
         // 前進速度
@@ -301,6 +303,24 @@ namespace UnityChan
             rb.velocity = stopvelo;
             anim.enabled = true;
         }
+
+        //private void OnTriggerEnter(Collider other)
+        //{
+        //    if (other.tag == "Enemy")
+        //    {
+        //        enemyList.Add(other.gameObject);
+        //    }
+        //}
+
+        //private void OnTriggerExit(Collider other)
+        //{
+        //    enemyList.Remove(other.gameObject);
+        //}
+
+        //internal static List<GameObject> GetEnemy()
+        //{
+        //    return enemyList;
+        //}
 
     }
 }
