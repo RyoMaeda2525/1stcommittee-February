@@ -10,7 +10,6 @@ public class EnemyChecker : MonoBehaviour
     {
         if (other.tag == "Enemy")
         {
-            Debug.Log("d");
             enemyList.Add(other.gameObject);
         }
     }
@@ -23,5 +22,13 @@ public class EnemyChecker : MonoBehaviour
     internal static List<GameObject> GetEnemy()
     {
         return enemyList;
+    }
+
+    public void Destroy(GameObject enemy)
+    {
+        if(enemyList.Contains(enemy) == true)
+        {
+            enemyList.Remove(enemy);
+        }
     }
 }

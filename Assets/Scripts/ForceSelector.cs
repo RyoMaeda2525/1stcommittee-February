@@ -26,7 +26,6 @@ public class ForceSelector : MonoBehaviour
     public void ForceSelect()
     {
         firstSelected = transform.GetChild(i).gameObject;
-        Debug.Log("a");
         //firstSelectedを選択
         EventSystem.current.SetSelectedGameObject(firstSelected.gameObject);
         //if (this.gameObject.name == "AttackCommandPanel")

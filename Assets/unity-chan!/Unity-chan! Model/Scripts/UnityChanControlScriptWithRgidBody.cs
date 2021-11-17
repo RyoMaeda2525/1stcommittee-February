@@ -23,9 +23,8 @@ namespace UnityChan
                                                     // このスイッチが入っていないとカーブは使われない
         public float useCurvesHeight = 0.5f;        // カーブ補正の有効高さ（地面をすり抜けやすい時には大きくする）
         PauseMenuController _pauseMenu = default;   //一時停止の命令を取得する
-        Vector3 stopvelo = default;                 //停止する直前の速度を取得する
-        //public bool pauseupdate = false;             //停止した際に動かないようにするため
-        public bool pauseresum = false;
+        Vector3 stopvelo = default;                 //停止する直前の速度を取得する         
+        public bool pauseresum = false;             //停止した際に動かないようにするため
         public List<GameObject> enemyList = new List<GameObject>();
 
         // 以下キャラクターコントローラ用パラメタ
@@ -39,13 +38,13 @@ namespace UnityChan
         public float jumpPower = 3.0f;
         // キャラクターコントローラ（カプセルコライダ）の参照
         private CapsuleCollider col;
-        private Rigidbody rb;
+        private Rigidbody _rb;
         // キャラクターコントローラ（カプセルコライダ）の移動量
         private Vector3 velocity;
         // CapsuleColliderで設定されているコライダのHeiht、Centerの初期値を収める変数
         private float orgColHight;
         private Vector3 orgVectColCenter;
-        private Animator anim;                          // キャラにアタッチされるアニメーターへの参照
+        private Animator _anim;                          // キャラにアタッチされるアニメーターへの参照
         private AnimatorStateInfo currentBaseState;         // base layerで使われる、アニメーターの現在の状態の参照
 
         private GameObject cameraObject;    // メインカメラへの参照
@@ -60,10 +59,10 @@ namespace UnityChan
         void Start()
         {
             // Animatorコンポーネントを取得する
-            anim = GetComponent<Animator>();
+            _anim = GetComponent<Animator>();
             // CapsuleColliderコンポーネントを取得する（カプセル型コリジョン）
             col = GetComponent<CapsuleCollider>();
-            rb = GetComponent<Rigidbody>();
+            _rb = GetComponent<Rigidbody>();
             //メインカメラを取得する
             cameraObject = GameObject.FindWithTag("MainCamera");
             // CapsuleColliderコンポーネントのHeight、Centerの初期値を保存する
@@ -79,10 +78,12 @@ namespace UnityChan
             float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
             //anim.SetFloat("Speed", v);                          // Animator側で設定している"Speed"パラメタにvを渡す
             //anim.SetFloat("Direction", h);                      // Animator側で設定している"Direction"パラメタにhを渡す
-            anim.speed = animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
-            currentBaseState = anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-            rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
-
+            _anim.speed = animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
+            currentBaseState = _anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
+            _rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
+            Vector3 walkSpeed = _rb.velocity;
+            walkSpeed.y = 0;
+            _anim.SetFloat("Speed", walkSpeed.magnitude);
 
             if (!pauseresum)
             {
@@ -103,12 +104,11 @@ namespace UnityChan
 
                 if (dir == Vector3.zero)
                 {
-                    anim.SetBool("run", false);
-                    rb.velocity = new Vector3(0f, rb.velocity.y, 0f);// 方向の入力がニュートラルの時は、y 軸方向の速度を保持する
+                    _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);// 方向の入力がニュートラルの時は、y 軸方向の速度を保持する
                 }
                 else
                 {
-                    anim.SetBool("run", true);
+                    //anim.SetBool("run", true);
                     // カメラを基準に入力が上下=奥/手前, 左右=左右にキャラクターを向ける
                     dir = Camera.main.transform.TransformDirection(dir);    // メインカメラを基準に入力方向のベクトルを変換する
                     dir.y = 0;  // y 軸方向はゼロにして水平方向のベクトルにする
@@ -117,8 +117,8 @@ namespace UnityChan
                     this.transform.rotation = Quaternion.Slerp(this.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
 
                     Vector3 velo = dir.normalized * forwardSpeed; // 入力した方向に移動する
-                    velo.y = rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
-                    rb.velocity = velo;   // 計算した速度ベクトルをセットする
+                    velo.y = _rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
+                    _rb.velocity = velo;   // 計算した速度ベクトルをセットする
                 }
 
                 //if (Input.GetButtonDown("Jump"))
@@ -161,7 +161,7 @@ namespace UnityChan
                 {
                     cameraObject.SendMessage("setCameraPositionJumpView");  // ジャンプ中のカメラに変更
                                                                             // ステートがトランジション中でない場合
-                    if (!anim.IsInTransition(0))
+                    if (!_anim.IsInTransition(0))
                     {
 
                         // 以下、カーブ調整をする場合の処理
@@ -170,10 +170,10 @@ namespace UnityChan
                             // 以下JUMP00アニメーションについているカーブJumpHeightとGravityControl
                             // JumpHeight:JUMP00でのジャンプの高さ（0〜1）
                             // GravityControl:1⇒ジャンプ中（重力無効）、0⇒重力有効
-                            float jumpHeight = anim.GetFloat("JumpHeight");
-                            float gravityControl = anim.GetFloat("GravityControl");
+                            float jumpHeight = _anim.GetFloat("JumpHeight");
+                            float gravityControl = _anim.GetFloat("GravityControl");
                             if (gravityControl > 0)
-                                rb.useGravity = false;  //ジャンプ中の重力の影響を切る
+                                _rb.useGravity = false;  //ジャンプ中の重力の影響を切る
 
                             // レイキャストをキャラクターのセンターから落とす
                             Ray ray = new Ray(transform.position + Vector3.up, -Vector3.up);
@@ -195,7 +195,7 @@ namespace UnityChan
                             }
                         }
                         // Jump bool値をリセットする（ループしないようにする）				
-                        anim.SetBool("Jump", false);
+                        _anim.SetBool("Jump", false);
                     }
 
                 }
@@ -212,7 +212,7 @@ namespace UnityChan
                     // スペースキーを入力したらRest状態になる
                     if (Input.GetButtonDown("Jump"))
                     {
-                        anim.SetBool("Rest", true);
+                        _anim.SetBool("Rest", true);
                     }
                 }
                 // REST中の処理
@@ -221,9 +221,9 @@ namespace UnityChan
                 {
                     //cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
                     // ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
-                    if (!anim.IsInTransition(0))
+                    if (!_anim.IsInTransition(0))
                     {
-                        anim.SetBool("Rest", false);
+                        _anim.SetBool("Rest", false);
                     }
                 }
             }
@@ -292,16 +292,16 @@ namespace UnityChan
 
         void Pause() //停止処理
         {
-            stopvelo = rb.velocity;
-            rb.velocity = Vector3.zero;
-            anim.enabled = false;
+            stopvelo = _rb.velocity;
+            _rb.velocity = Vector3.zero;
+            _anim.enabled = false;
 
         }
 
         void Resum() //再開
         {
-            rb.velocity = stopvelo;
-            anim.enabled = true;
+            _rb.velocity = stopvelo;
+            _anim.enabled = true;
         }
 
         //private void OnTriggerEnter(Collider other)
