@@ -12,11 +12,18 @@ public class AttackButton : MonoBehaviour
     LineRenderer lineR = default;
     EventSystem eventS = default;
     GameObject unityChan = default;
+    ActionSlider acs = default;
     string enemyName = "None";
+    RandomMovement rm = default;
+    PauseMenuController pauseM = default;
+    PlayerNavMesh plaNav = default;
 
     private void Awake()
     {
         lineR = GetComponent<LineRenderer>();
+        plaNav = GameObject.FindObjectOfType<PlayerNavMesh>();
+        acs = GameObject.FindObjectOfType<ActionSlider>();
+        pauseM = GameObject.FindObjectOfType<PauseMenuController>();
         eventS = GameObject.Find("EventSystem").GetComponent<EventSystem>();
     }
 
@@ -29,17 +36,15 @@ public class AttackButton : MonoBehaviour
     // Start is called before the first frame update
     public void EnemySet(GameObject enemy)
     {
-        //Debug.Log(enemy.name+"A");
         Button b = GetComponent<Button>();
-        //if(enemy != null)
-        //{
+
         enemyName = enemy.name;
         enemyNameText.text = enemyName;
         b?.OnSelectAsObservable()
             .Subscribe(_ => lineR.SetPosition(1, enemy.transform.position));
 
         b?.OnClickAsObservable()
-            .Subscribe(_ => enemy.GetComponent<Damage>().Hit(100,0.5f));
+            .Subscribe(_ => Attack(enemy));
     }
 
     // Update is called once per frame
@@ -55,4 +60,12 @@ public class AttackButton : MonoBehaviour
         }
 
     }
+
+    void Attack(GameObject enemy) 
+    {
+        plaNav.Enemydiscover(enemy);
+        pauseM.OnAttack();
+        acs.ChangeValue(enemy);
+    }
+
 }

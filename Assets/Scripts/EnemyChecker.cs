@@ -11,12 +11,17 @@ public class EnemyChecker : MonoBehaviour
         if (other.tag == "Enemy")
         {
             enemyList.Add(other.gameObject);
+            other.GetComponent<Damage>().Alpha();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        enemyList.Remove(other.gameObject);
+        if (other.tag == "Enemy")
+        {
+            enemyList.Remove(other.gameObject);
+            other.GetComponent <Damage>().NonAlpha();
+        }
     }
 
     internal static List<GameObject> GetEnemy()

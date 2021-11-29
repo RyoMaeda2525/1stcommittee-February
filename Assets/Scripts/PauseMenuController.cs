@@ -13,17 +13,16 @@ public class PauseMenuController : MonoBehaviour
     [SerializeField] GameObject attackCommandButton = default;
     [SerializeField] GameObject attackCommandPanel = default;
     //[SerializeField] UnityChanControlScriptWithRgidBody unitychan = default;
-    ForceSelector attackCommandForce = default;
     ForceSelector commandForce = default;
     List<GameObject> enemyList = new List<GameObject>();
     AttackButton attackButtonScript = default;
+    bool _gameBack = true;
     //public int enemyCount = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        commandForce = commandPanel.GetComponent<ForceSelector>()
-;        attackCommandForce = attackCommandPanel.GetComponent<ForceSelector>();
+        commandForce = commandPanel.GetComponent<ForceSelector>();
     }
 
     // Update is called once per frame
@@ -32,8 +31,9 @@ public class PauseMenuController : MonoBehaviour
         // 左クリックしたら一時停止・再開しつつコマンドメニューを切り替える
         if (Input.GetButtonDown("Fire1"))
         {
-            if (!_commandPause)
+            if (!_commandPause && _gameBack)
                 OnCommandMenu();
+                _gameBack = false;
         }
         else if (Input.GetButtonDown("Fire2"))
         {
@@ -57,6 +57,7 @@ public class PauseMenuController : MonoBehaviour
         {
             commandPanel.SetActive(true);
             _commandPause = true;
+            commandForce.ForceSelect();
             onCommandMenu(_commandPause);  // これで変数に代入した関数を全て呼び出せる
         }
         else
@@ -83,6 +84,22 @@ public class PauseMenuController : MonoBehaviour
             attackButtonScript.EnemySet(enemyList[i]);
             go.transform.SetParent(attackCommandPanel.transform);
         }
-        //attackCommandForce.ForceSelect();
+    }
+
+    public void OnAttack() 
+    {
+        attackCommandPanel.SetActive(false);
+        foreach (Transform t in attackCommandPanel.transform)
+        {
+            Destroy(t.gameObject);
+        }
+        commandPanel.SetActive(false);
+        _commandPause = false;
+        onCommandMenu(_commandPause);
+    }
+
+    public void GameBack() 
+    {
+       _gameBack = true;
     }
 }

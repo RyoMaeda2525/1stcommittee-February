@@ -28,7 +28,7 @@ public class IkSetPosition : MonoBehaviour
 
     private void Update()
     {
-        _target.position = rm.Destination();
+        //_target.position = rm.Destination();
     }
 
     void OnAnimatorIK(int layerIndex)

@@ -7,56 +7,34 @@ using UnityEngine;
 public class RandomMovement : MonoBehaviour
 {
 	private float timeCount;
-	[SerializeField]
-	private float colliderSize = 20;
-	private GameObject colliderObject;
-	Vector3 course = default;
-	public float speed = 3;
-	public float wanderRange;
+	public float startDistance = 20f;
+	public Vector3 startPosition = default;
 	private NavMeshAgent navMeshAgent;
 	private NavMeshHit navMeshHit;
 	public float selectInterval = 5;
-	Transform targettransform;
-	Rigidbody _rb = default;
 	Animator _anim = default;
 	bool _stop = false;
-	PauseMenuController _pauseMenu = default;   //一時停止の命令を取得する
+	public bool _playerAttack = true;
+	PauseMenuController _pauseMenu = default;   
 	Vector3 stopvelo = default;
+	int Atk = 0;
+	float critical = 0.01f;
 
 	void Start()
 	{
 		navMeshAgent = GetComponent<NavMeshAgent>();
-        navMeshAgent.destination = transform.position;
 		SetDestination();
 		navMeshAgent.avoidancePriority = Random.Range(0, 100);
-        wanderRange = base.transform.position.x;
-		_rb = GetComponent<Rigidbody>();
+		startPosition = this.transform.position;
 		_anim = GetComponent<Animator>();
 	}
-
-	//void RandomWander()
-	//{
-	//	//指定した目的地に障害物があるかどうか、そもそも到達可能なのかを確認して問題なければセットする。
-	//	//pathPending 経路探索の準備できているかどうか
-	//	if (!navMeshAgent.pathPending)
-	//	{
-	//		if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
-	//		{
-	//			//hasPath エージェントが経路を持っているかどうか
-	//			//navMeshAgent.velocity.sqrMagnitudeはスピード
-	//			if (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude == 0f)
-	//			{
-	//				SetDestination();
-	//			}
-	//		}
-	//	}
-	//}
 
     private void FixedUpdate()
     {
 		timeCount += Time.deltaTime;
 		if(timeCount > selectInterval && !_stop)
         {
+			_playerAttack = true;
 			SetDestination();
 			timeCount = 0;
         }
@@ -65,27 +43,21 @@ public class RandomMovement : MonoBehaviour
 		var angle = Vector3.Angle(this.transform.forward , diff) ; 
 		var pov = angle * axis;
 		_anim.SetFloat("angle", pov);
-		//targettransform.position = transform.position;
-		//Vector3 walkSpeed = _rb.velocity;
-		//walkSpeed.y = 0;
 		_anim.SetFloat("Speed", navMeshAgent.velocity.magnitude);
-		Debug.Log(navMeshAgent.velocity.magnitude);
-		//_anim.SetFloat("Speedx", x);
-		//_anim.SetFloat("Speedy", y);
+
+		if(Vector3.Distance(this.transform.position , startPosition) > startDistance && _playerAttack == true) 
+		{
+			_playerAttack = false;
+			SetDestination();
+		}
 	}
 
     private void SetDestination()
 	{
-		Vector3 randomPos = new Vector3(Random.Range(wanderRange - 20, wanderRange), 0, Random.Range(wanderRange - 20, wanderRange));
+		Vector3 randomPos = new Vector3(Random.Range(startPosition.x - 10, startPosition.x + 10), 0, Random.Range(startPosition.z - 10, startPosition.z + 10));
 		NavMesh.SamplePosition(randomPos, out navMeshHit, 10, 1);
 		navMeshAgent.destination = navMeshHit.position;
 	}
-
-    public Vector3 Destination()
-    {
-		Vector3 p = navMeshAgent.destination;
-		return p;
-    }
 
 	private void Awake() // この処理は Start やると遅いので Awake でやっている
 	{
@@ -95,13 +67,11 @@ public class RandomMovement : MonoBehaviour
 	private void OnEnable() //ゲームに入ると加わる
 	{
 		_pauseMenu.onCommandMenu += PauseCommand;
-		//_pauseMenu.offCommandMenu += ResumCommand;
 	}
 
 	private void OnDisable() //消えると抜ける
 	{
 		_pauseMenu.onCommandMenu -= PauseCommand;
-		//_pauseMenu.offCommandMenu -= ResumCommand;
 	}
 
 	void PauseCommand(bool onPause)
@@ -117,16 +87,6 @@ public class RandomMovement : MonoBehaviour
 			_stop = false;
 		}
 	}
-
-	//void ResumCommand(bool onResum)
-	//{
-	//    if (onResum && pauseresum)
-	//    {
-	//        Debug.Log("a");
-	//        Resum();
-	//        pauseresum = false;
-	//    }
-	//}
 
 	void Pause() //停止処理
 	{
@@ -144,4 +104,17 @@ public class RandomMovement : MonoBehaviour
 		_anim.enabled = true;
 	}
 
+    private void OnTriggerStay(Collider collision)
+    {
+        if(collision.gameObject.tag == "Player") 
+		{
+			navMeshAgent.destination = collision.transform.position;
+			transform.LookAt(collision.transform.position);
+			if (_playerAttack)
+            {
+				collision.GetComponent<Damage>().Hit(Atk, critical);
+				_anim.Play("Attack");
+            }
+		}
+    }
 }

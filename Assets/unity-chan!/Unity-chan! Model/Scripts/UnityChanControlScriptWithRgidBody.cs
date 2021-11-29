@@ -46,7 +46,6 @@ namespace UnityChan
         private Vector3 orgVectColCenter;
         private Animator _anim;                          // キャラにアタッチされるアニメーターへの参照
         private AnimatorStateInfo currentBaseState;         // base layerで使われる、アニメーターの現在の状態の参照
-
         private GameObject cameraObject;    // メインカメラへの参照
 
         // アニメーター各ステートへの参照
@@ -76,30 +75,14 @@ namespace UnityChan
         {
             float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-            //anim.SetFloat("Speed", v);                          // Animator側で設定している"Speed"パラメタにvを渡す
-            //anim.SetFloat("Direction", h);                      // Animator側で設定している"Direction"パラメタにhを渡す
             _anim.speed = animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
             currentBaseState = _anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-            _rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
-            Vector3 walkSpeed = _rb.velocity;
-            walkSpeed.y = 0;
-            _anim.SetFloat("Speed", walkSpeed.magnitude);
+
 
             if (!pauseresum)
             {
-                //// 以下、キャラクターの移動処理
-                //velocity = new Vector3(0, 0, v);        // 上下のキー入力からZ軸方向の移動量を取得
-                //                                        // キャラクターのローカル空間での方向に変換
-                //velocity = transform.TransformDirection(velocity);
-                ////以下のvの閾値は、Mecanim側のトランジションと一緒に調整する
-                //if (v > 0.1)
-                //{
-                //    velocity *= forwardSpeed;       // 移動速度を掛ける
-                //}
-                //else if (v < -0.1)
-                //{
-                //    velocity *= backwardSpeed;  // 移動速度を掛ける
-                //}
+                GameObject.FindObjectOfType<PauseMenuController>().GameBack();
+
                 Vector3 dir = Vector3.forward * v + Vector3.right * h;
 
                 if (dir == Vector3.zero)
@@ -120,7 +103,9 @@ namespace UnityChan
                     velo.y = _rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
                     _rb.velocity = velo;   // 計算した速度ベクトルをセットする
                 }
-
+                Vector3 walkSpeed = _rb.velocity;
+                walkSpeed.y = 0;
+                _anim.SetFloat("Speed", walkSpeed.magnitude);
                 //if (Input.GetButtonDown("Jump"))
                 //{   // スペースキーを入力したら
 

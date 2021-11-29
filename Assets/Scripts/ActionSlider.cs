@@ -11,54 +11,67 @@ public class ActionSlider : MonoBehaviour
     bool _stop = false;
     PauseMenuController _pauseMenu = default;
     Tweener tweener = default;
+    PlayerStatus plst = default;
+    Image background = default;
+    bool _backgroundAlpha = false;
 
     private void Awake() // この処理は Start やると遅いので Awake でやっている
     {
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
+        plst = GameObject.FindObjectOfType<PlayerStatus>();
+        background = transform.Find("Background").GetComponent<Image>();
     }
 
     void Start()
     {
         slider = GetComponent<Slider>();
-        Fill();
-        Change();
+        Reset();
     }
 
     /// <summary>
     /// ゲージを減らす
     /// </summary>
     /// <param name="value">増減させる量（割合）</param>
-    public void Change()
+    public void FixedUpdate()
     {
-        ChangeValue(1f);
+        if (!_stop)
+        {
+            if (_backgroundAlpha)
+                background.color = Color.Lerp(background.color, new Color(0f, 0f, 0f, 255f), 2f * Time.deltaTime);
+            if (!_backgroundAlpha)
+                background.color = Color.Lerp(background.color, new Color(0f, 0f, 0f, 0f), 2f * Time.deltaTime);
+        }
     }
 
     /// <summary>
     /// ゲージを満タンにする
     /// </summary>
-    public void Fill()
+    public void Reset()
     {
         slider.value = 0f;
+        _backgroundAlpha = false;
     }
 
     /// <summary>
     /// 指定された値までゲージを滑らかに変化させる
     /// </summary>
     /// <param name="value"></param>
-    void ChangeValue(float value)
+    public void ChangeValue(GameObject enemy)
     {
-        //Camera.main.DOColor(Color.white, 5f)
-        //.SetEase(Ease.InBounce)
-        //.OnComplete(() => Debug.Log("色変更完了"));
-        // DOTween.To() を使って連続的に変化させる
+        if (slider.value > 0f || slider.value < 1f)
+        {
+            tweener.Kill();
+            Reset();
+        }
+        if (background.color.a != 255)
+        {
+            _backgroundAlpha = true;
+        }
         tweener = DOTween.To(() => slider.value, // 連続的に変化させる対象の値
             x => slider.value = x, // 変化させた値 x をどう処理するかを書く
-            value, // x をどの値まで変化させるか指示する
-            _changeValueInterval);   // 何秒かけて変化させるか指示する
-        if (slider.value <= 0.999f)
-        {
-            Fill();
-        }
+            1f, // x をどの値まで変化させるか指示する
+            _changeValueInterval)// 何秒かけて変化させるか指示す
+            .OnComplete(() => Attack(enemy));
     }
 
     private void OnEnable() //ゲームに入ると加わる
@@ -76,10 +89,18 @@ public class ActionSlider : MonoBehaviour
         if (onPause)
         {
             tweener.Pause();
+            _stop = true;
         }
         else
         {
             tweener.Play();
+            _stop = false;
         }
     }
+
+    void Attack(GameObject enemy)
+    {
+        plst.Attack(enemy);
+    }
+
 }
