@@ -7,7 +7,6 @@ public class PlayerStatus : MonoBehaviour
     public int atk = 20;
     public float critical = 0.5f;
     public bool _enemyT = false;
-    Damage enemyDamage = default;
     ActionSlider acs = default;
     List<GameObject> enemyList = new List<GameObject>();
     GameObject[] enemyTarget = new GameObject[1];
@@ -21,7 +20,9 @@ public class PlayerStatus : MonoBehaviour
 
     public void Attack(GameObject enemy)
     {
-        //enemyDamage = enemy.GetComponent<Damage>();
+        while(Input.GetAxis("Horizontal") != 0 && Input.GetAxis("Vertical") != 0) 
+        {
+        }
         enemyTarget[0] = enemy;
         this.GetComponent<Animator>().Play("Attack");
     }
@@ -29,8 +30,9 @@ public class PlayerStatus : MonoBehaviour
     public void Hit()
     {
         enemyList = EnemyChecker.GetEnemy();
-        this.GetComponent<PlayerNavMesh>().EnemyCancel();
-        enemyTarget[0].GetComponent<Damage>().Hit(atk ,critical);
+        GetComponent<PlayerNavMesh>().TargetCancel();
+        //GetComponent<IkSetPosition>().TargetLost();
+        enemyTarget[0].GetComponent<Damage>().HitAttack(atk ,critical);
     }
 
     public void SliderReset() 

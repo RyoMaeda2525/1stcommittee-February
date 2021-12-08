@@ -7,7 +7,7 @@ using DG.Tweening;
 public class Damage : MonoBehaviour
 {
     public int hitpointMax = 100;
-    int hitPoint = 100;
+     int hitPoint = 100;
     public int defense = 40;
     int hit = 0;
     Tweener tweener = default;
@@ -30,23 +30,28 @@ public class Damage : MonoBehaviour
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
         hitPoint = hitpointMax;
         tempHp = hitpointMax;
+        MaxHPText();
     }
 
     private void Start()
-    {
-        hpSlider.maxValue = hitpointMax;
+    {   if(gameObject.tag != "Player") 
+        {
+            hpSlider.maxValue = hitpointMax;
+        }
         ChangeValue();
     }
 
-    public void Hit(int damege, float critical) //攻撃を受け取る
+    public void HitAttack(int damege, float critical) //攻撃を受け取る
     {
         if (Random.Range(0.09f, 100f) < critical) //クリティカル判定
         {
+            
             hit = damege;
             hitPoint -= hit;
         }
         else //通常攻撃
         {
+            Debug.Log("Hit");
             hit = damege / 2 - defense / 4;
             hitPoint -= hit;
         }
@@ -55,9 +60,12 @@ public class Damage : MonoBehaviour
             Destroy(this.gameObject);
         }
         ChangeValue();
-        Text _text = Instantiate(damageText, pivot.transform.position - Camera.main.transform.forward * 0.2f, Quaternion.identity);
-        _text.text = hit.ToString();
-        _text.transform.SetParent(canvas.transform);
+        if(gameObject.tag != "Player") 
+        {
+            Text _text = Instantiate(damageText, pivot.transform.position - Camera.main.transform.forward * 0.2f, Quaternion.identity);
+            _text.text = hit.ToString();
+            _text.transform.SetParent(canvas.transform);
+        }
     }
 
     // Update is called once per frame
@@ -65,6 +73,7 @@ public class Damage : MonoBehaviour
     {
         hitPoint += heal;
         hitPoint = System.Math.Min(hitPoint, hitpointMax);
+        ChangeValue();
     }
 
     private void OnDestroy()
@@ -97,14 +106,13 @@ public class Damage : MonoBehaviour
 
     public void ChangeValue()
     {
-       if(this.gameObject.tag == "Player" )    
+        if (this.gameObject.tag == "Player")
         {
             DOTween.To(() => tempHp, // 連続的に変化させる対象の値
             x => tempHp = x, // 変化させた値 x をどう処理するかを書く
             hitPoint, // x をどの値まで変化させるか指示する
-            hpChangeInterval)   // 何秒かけて変化させるか指示する
+            hpChangeInterval)  // 何秒かけて変化させるか指示する
             .OnUpdate(() => hpText.text = tempHp.ToString("000"));   // 数値が変化する度に実行する処理を書く
-
         }
         else 
         {
@@ -147,5 +155,10 @@ public class Damage : MonoBehaviour
     public void NonAlpha()
     {
         _Alpha = false;
+    }
+
+    public void MaxHPText() 
+    {
+        maxhpText.text = hitpointMax.ToString("000");
     }
 }

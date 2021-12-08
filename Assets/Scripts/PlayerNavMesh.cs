@@ -23,34 +23,34 @@ public class PlayerNavMesh : MonoBehaviour
     {
         _anim = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        EnemyCancel();
+        Stop();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        if (Input.GetAxis("Horizontal") != 0 && Input.GetAxis("Vertical") != 0 && navMeshAgent.enabled)
         {
             navMeshAgent.isStopped = true;
         }
-        else if (_enemytarget && !_stop)
+        else if (!_stop && navMeshAgent.enabled)
         {
-            EnemyResum();
+            Resum();
         }
 
-        if (!navMeshAgent.isStopped)
+        if (navMeshAgent.enabled)
         {
             navMeshAgent.destination = enemyT.transform.position ;
-            transform.LookAt(enemyT.transform.Find("Pivot").transform.position);
         }
         _anim.SetFloat("NavSpeed", navMeshAgent.velocity.magnitude);
     }
 
     public void Enemydiscover(GameObject enemy)
     {
+        navMeshAgent.enabled = true;
         enemyT = enemy;
-        _enemytarget = true;
-        EnemyResum();
+        //gameObject.GetComponent<IkSetPosition>().Target(enemy);
+        Resum();
     }
 
     private void OnEnable() //ゲームに入ると加わる
@@ -70,25 +70,30 @@ public class PlayerNavMesh : MonoBehaviour
             stopvelo = navMeshAgent.velocity;
             navMeshAgent.velocity = Vector3.zero;
             _stop = true;
-            navMeshAgent.isStopped = true;
+            Stop();
         }
         else
         {
             navMeshAgent.velocity = stopvelo;
             _stop = false;
-            EnemyResum();
+            Resum();
         }
     }
 
-    public void EnemyCancel()
+    private void Stop()
     {
+        if (navMeshAgent.enabled)
         navMeshAgent.isStopped = true;
-        _enemytarget = false;
     }
 
-    private void EnemyResum()
+    private void Resum()
     {
+       if(navMeshAgent.enabled)
         navMeshAgent.isStopped = false;
     }
 
+    public void TargetCancel()
+    {
+        navMeshAgent.enabled = false;
+    }
 }

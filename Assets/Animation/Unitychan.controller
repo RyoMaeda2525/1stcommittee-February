@@ -14,16 +14,16 @@ AnimatorStateMachine:
     m_Position: {x: 290.56476, y: 68.46402, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6413580109407366968}
-    m_Position: {x: 410, y: -100, z: 0}
+    m_Position: {x: 420, y: -100, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 4753792075451250570}
     m_Position: {x: 490, y: 240, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 4041484594287680659}
-    m_Position: {x: 1019.3479, y: 134.01099, z: 0}
+    m_Position: {x: 1020, y: 130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3937365197800993697}
-    m_Position: {x: 170, y: 370, z: 0}
+    m_Position: {x: 220, y: 350, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -69,7 +69,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Idle
-  m_Speed: 1
+  m_Speed: 0.6
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -3026253862328915419}
@@ -83,7 +83,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: bf3d73031ab7c4c4293eb5f07fec50db, type: 2}
+  m_Motion: {fileID: 7400000, guid: e0da4ce0e3beeae4eba042011f762525, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -128,19 +128,19 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: Speed
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: NavSpeed
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -151,7 +151,7 @@ AnimatorController:
     m_BlendingMode: 0
     m_SyncedLayerIndex: -1
     m_DefaultWeight: 0
-    m_IKPass: 0
+    m_IKPass: 1
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
 --- !u!1102 &3937365197800993697

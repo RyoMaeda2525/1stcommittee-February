@@ -18,23 +18,37 @@ public class IkSetPosition : MonoBehaviour
     /// <summary>関節の動きをどれくらい制限するか</summary>
     [SerializeField, Range(0f, 1f)] float _clampWeight = 0;
     Animator _anim = default;
-    [SerializeField] RandomMovement rm = default;
+    GameObject enemy = default;
+    bool _targetLost = true;
 
     void Start()
     {
         _anim = GetComponent<Animator>();
-        rm = GetComponent<RandomMovement>();
     }
 
     private void Update()
     {
-        //_target.position = rm.Destination();
+        if(!_targetLost)
+        _target = enemy.transform;
     }
 
     void OnAnimatorIK(int layerIndex)
     {
         // LookAt の重みとターゲットを指定する
         _anim.SetLookAtWeight(_weight, _bodyWeight, _headWeight, _eyesWeight, _clampWeight);
-        _anim.SetLookAtPosition(_target.position);
+        if (!_targetLost)
+            _anim.SetLookAtPosition(_target.position);
     }
+
+    public void Target(GameObject _enemy) 
+    {
+        enemy = _enemy;
+        _targetLost = false;
+    }
+
+    public void TargetLost() 
+    {
+        _targetLost = true;
+    }
+
 }

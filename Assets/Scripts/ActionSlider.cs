@@ -71,7 +71,7 @@ public class ActionSlider : MonoBehaviour
             x => slider.value = x, // 変化させた値 x をどう処理するかを書く
             1f, // x をどの値まで変化させるか指示する
             _changeValueInterval)// 何秒かけて変化させるか指示す
-            .OnComplete(() => Attack(enemy));
+            .OnComplete(() => plst.Attack(enemy));
     }
 
     private void OnEnable() //ゲームに入ると加わる
