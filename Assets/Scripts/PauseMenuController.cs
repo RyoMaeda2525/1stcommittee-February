@@ -12,7 +12,6 @@ public class PauseMenuController : MonoBehaviour
     public event Action<bool> offCommandMenu;
     [SerializeField] GameObject attackCommandButton = default;
     [SerializeField] GameObject attackCommandPanel = default;
-    //[SerializeField] UnityChanControlScriptWithRgidBody unitychan = default;
     ForceSelector commandForce = default;
     List<GameObject> enemyList = new List<GameObject>();
     AttackButton attackButtonScript = default;
@@ -35,7 +34,8 @@ public class PauseMenuController : MonoBehaviour
                 OnCommandMenu();
                 _gameBack = false;
         }
-        else if (Input.GetButtonDown("Fire2"))
+        
+        if (Input.GetButtonDown("Fire2"))
         {
             if (attackCommandPanel.activeSelf)
             {

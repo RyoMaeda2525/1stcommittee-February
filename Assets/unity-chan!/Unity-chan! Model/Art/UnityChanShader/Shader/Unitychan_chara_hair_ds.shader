@@ -1,4 +1,5 @@
-Shader "UnityChan/Hair - Double-sided"
+Shader "
+/Hair - Double-sided"
 {
 	Properties
 	{

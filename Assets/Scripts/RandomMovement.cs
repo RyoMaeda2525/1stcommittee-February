@@ -11,7 +11,7 @@ public class RandomMovement : MonoBehaviour
     public Vector3 startPosition = default;
     private NavMeshAgent navMeshAgent;
     private NavMeshHit navMeshHit;
-    public float selectInterval = 5;
+    public float selectInterval = 10;
     Animator _anim = default;
     bool _stop = false;
     public bool _playerAttack = true;
@@ -100,7 +100,6 @@ public class RandomMovement : MonoBehaviour
         navMeshAgent.velocity = Vector3.zero;
         navMeshAgent.isStopped = true;
         _anim.enabled = false;
-
     }
 
     void Resum() //再開
@@ -120,8 +119,8 @@ public class RandomMovement : MonoBehaviour
             if (interval > 5)
             {
                 interval = 0;
-                collision.GetComponent<Damage>().HitAttack(Atk, critical);
                 _anim.Play("Attack");
+                collision.GetComponent<Damage>().HitAttack(Atk, critical);          
             }
 
         }

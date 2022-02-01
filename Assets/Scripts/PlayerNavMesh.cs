@@ -29,27 +29,28 @@ public class PlayerNavMesh : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Input.GetAxis("Horizontal") != 0 && Input.GetAxis("Vertical") != 0 && navMeshAgent.enabled)
-        {
-            navMeshAgent.isStopped = true;
-        }
-        else if (!_stop && navMeshAgent.enabled)
-        {
-            Resum();
-        }
-
         if (navMeshAgent.enabled)
         {
-            navMeshAgent.destination = enemyT.transform.position ;
+            if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0 && !navMeshAgent.isStopped)
+            {
+                navMeshAgent.isStopped = true;
+            }
+            else if (!_stop)
+            {
+                Resum();
+            }
+                
+            navMeshAgent.destination = enemyT.transform.position;
+            Debug.Log(enemyT);
         }
-        _anim.SetFloat("NavSpeed", navMeshAgent.velocity.magnitude);
+            _anim.SetFloat("NavSpeed", navMeshAgent.velocity.magnitude);
     }
 
     public void Enemydiscover(GameObject enemy)
     {
         navMeshAgent.enabled = true;
         enemyT = enemy;
-        //gameObject.GetComponent<IkSetPosition>().Target(enemy);
+        if(navMeshAgent.isStopped)
         Resum();
     }
 

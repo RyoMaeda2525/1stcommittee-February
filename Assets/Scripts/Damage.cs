@@ -7,7 +7,7 @@ using DG.Tweening;
 public class Damage : MonoBehaviour
 {
     public int hitpointMax = 100;
-     int hitPoint = 100;
+    public int hitPoint = 100;
     public int defense = 40;
     int hit = 0;
     Tweener tweener = default;
@@ -28,16 +28,13 @@ public class Damage : MonoBehaviour
     private void Awake()
     {
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
-        hitPoint = hitpointMax;
+        //hitPoint = hitpointMax;
         tempHp = hitpointMax;
         MaxHPText();
     }
 
     private void Start()
-    {   if(gameObject.tag != "Player") 
-        {
-            hpSlider.maxValue = hitpointMax;
-        }
+    {   
         ChangeValue();
     }
 
@@ -60,12 +57,9 @@ public class Damage : MonoBehaviour
             Destroy(this.gameObject);
         }
         ChangeValue();
-        if(gameObject.tag != "Player") 
-        {
             Text _text = Instantiate(damageText, pivot.transform.position - Camera.main.transform.forward * 0.2f, Quaternion.identity);
             _text.text = hit.ToString();
             _text.transform.SetParent(canvas.transform);
-        }
     }
 
     // Update is called once per frame
@@ -81,26 +75,13 @@ public class Damage : MonoBehaviour
         GameObject.FindObjectOfType<EnemyChecker>().Destroy(this.gameObject);
     }
 
-    public void FixedUpdate()
+    private void FixedUpdate()
     {
-        if(gameObject.tag != "Player") 
+        canvas.transform.LookAt(Camera.main.transform.position);
+
+        if (gameObject.tag == "Player")
         {
-            hpSlider.transform.LookAt(Camera.main.transform.position);
-
-            //if (!_stop)
-            //{
-            //    if (_Alpha)
-            //    {
-            //        background.color = new Color(132f, 0f, 0f, 255f);
-            //        fill.color = new Color(255f, 100f, 47f, 255f);
-            //    }
-            //    else
-            //    {
-            //        background.color = new Color(132f, 0f, 0f, 0f);
-            //        fill.color = new Color(255f, 100f, 47f, 0f);
-            //    }
-            //}
-
+            hpSlider.maxValue = hitpointMax;
         }
     }
 
@@ -113,17 +94,14 @@ public class Damage : MonoBehaviour
             hitPoint, // x をどの値まで変化させるか指示する
             hpChangeInterval)  // 何秒かけて変化させるか指示する
             .OnUpdate(() => hpText.text = tempHp.ToString("000"));   // 数値が変化する度に実行する処理を書く
-        }
-        else 
-        {
+        } 
             tweener = DOTween.To(() => hpSlider.value, // 連続的に変化させる対象の値
             x => hpSlider.value = x, // 変化させた値 x をどう処理するかを書く
             hitPoint, // x をどの値まで変化させるか指示する
-            hpChangeInterval);// 何秒かけて変化させるか指示す
+            hpChangeInterval);/*.OnComplete(() => Debug.Log("完了"));// 何秒かけて変化させるか指示す*/
         }
-    }
 
-    private void OnEnable() //ゲームに入ると加わる
+        private void OnEnable() //ゲームに入ると加わる
     {
         _pauseMenu.onCommandMenu += PauseCommand;
     }
@@ -159,6 +137,7 @@ public class Damage : MonoBehaviour
 
     public void MaxHPText() 
     {
+        if(gameObject.tag == "Player")
         maxhpText.text = hitpointMax.ToString("000");
     }
 }

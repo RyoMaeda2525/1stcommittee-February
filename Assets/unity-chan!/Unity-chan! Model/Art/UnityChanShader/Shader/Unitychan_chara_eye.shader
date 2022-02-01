@@ -1,4 +1,6 @@
-Shader "UnityChan/Eye"
+Shader "
+
+/Eye"
 {
 	Properties
 	{

@@ -29,13 +29,14 @@ public class AttackButton : MonoBehaviour
 
     private void Start()
     {
-        unityChan = GameObject.Find("Unitychan");
-        lineR.SetPosition(0, unityChan.transform.position);
+        
     }
 
     // Start is called before the first frame update
     public void EnemySet(GameObject enemy)
     {
+        unityChan = GameObject.Find("Unitychan");
+        lineR.SetPosition(0, unityChan.transform.position);
         Button b = GetComponent<Button>();
 
         enemyName = enemy.name;

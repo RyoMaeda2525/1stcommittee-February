@@ -11,28 +11,12 @@ public class ForceSelector : MonoBehaviour
 
     void Start()
     {
-        //if (firstSelected == null)
-        //{
-        //    firstSelected = transform.GetChild(0).gameObject;
-
-        //}
+        
     }
-
-    //void OnEnable()
-    //{
-    //    ForceSelect();
-    //}
 
     public void ForceSelect()
     {
-        firstSelected = transform.GetChild(i).gameObject;
-        //firstSelectedを選択
+        firstSelected = transform.GetChild(i).gameObject;//初めに選択するボタン
         EventSystem.current.SetSelectedGameObject(firstSelected.gameObject);
-        //if (this.gameObject.name == "AttackCommandPanel")
-        //{
-        //    List<GameObject> enemys = new List<GameObject>();
-        //    enemys = EnemyChecker.GetEnemy();
-        //    i = enemys.Count + 1;
-        //}
     }
 }
