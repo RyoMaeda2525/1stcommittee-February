@@ -6,11 +6,14 @@ using UnityEngine.AI;
 public class PlayerNavMesh : MonoBehaviour
 {
     private NavMeshAgent navMeshAgent;
-    GameObject enemyT = default;
+    [Tooltip("プレイキャラの確認"), SerializeField]
+    ChangePlayer chp = default;
+    public GameObject enemyT = default;
     bool _enemytarget = false;
     Animator _anim = default;
     PauseMenuController _pauseMenu = default;
     bool _stop = false;
+    bool _nonPlay = true;
     Vector3 stopvelo = Vector3.zero;
 
     private void Awake()
@@ -23,6 +26,7 @@ public class PlayerNavMesh : MonoBehaviour
     {
         _anim = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        enemyT = chp.charaList[0];
         Stop();
     }
 
@@ -31,27 +35,28 @@ public class PlayerNavMesh : MonoBehaviour
     {
         if (navMeshAgent.enabled)
         {
-            if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0 && !navMeshAgent.isStopped)
+            if (!_nonPlay)
             {
-                navMeshAgent.isStopped = true;
+                if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0 && !navMeshAgent.isStopped)
+                {
+                    navMeshAgent.isStopped = true;
+                }
+                else if (!_stop)
+                {
+                    Resum();
+                }
             }
-            else if (!_stop)
-            {
-                Resum();
-            }
-                
             navMeshAgent.destination = enemyT.transform.position;
-            Debug.Log(enemyT);
         }
-            _anim.SetFloat("NavSpeed", navMeshAgent.velocity.magnitude);
+        _anim.SetFloat("NavSpeed", navMeshAgent.velocity.magnitude);
     }
 
     public void Enemydiscover(GameObject enemy)
     {
         navMeshAgent.enabled = true;
         enemyT = enemy;
-        if(navMeshAgent.isStopped)
-        Resum();
+        if (navMeshAgent.isStopped)
+            Resum();
     }
 
     private void OnEnable() //ゲームに入ると加わる
@@ -84,17 +89,35 @@ public class PlayerNavMesh : MonoBehaviour
     private void Stop()
     {
         if (navMeshAgent.enabled)
-        navMeshAgent.isStopped = true;
+            navMeshAgent.isStopped = true;
     }
 
     private void Resum()
     {
-       if(navMeshAgent.enabled)
-        navMeshAgent.isStopped = false;
+        if (navMeshAgent.enabled)
+            navMeshAgent.isStopped = false;
     }
 
     public void TargetCancel()
     {
+        if (_nonPlay) 
+        {
+            enemyT = chp.charaList[chp.nowChara];
+        }
+        else
         navMeshAgent.enabled = false;
+    }
+
+    public void PlayNow() 
+    {
+        _nonPlay = false;
+        navMeshAgent.enabled = false;
+    }
+
+    public void NOPlay()
+    {
+        _nonPlay = true;
+        navMeshAgent.enabled = true;
+        enemyT = chp.charaList[chp.nowChara];
     }
 }

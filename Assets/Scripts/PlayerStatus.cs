@@ -31,7 +31,6 @@ public class PlayerStatus : MonoBehaviour
     {
         enemyList = EnemyChecker.GetEnemy();
         GetComponent<PlayerNavMesh>().TargetCancel();
-        //GetComponent<IkSetPosition>().TargetLost();
         enemyTarget[0].GetComponent<Damage>().HitAttack(atk ,critical);
     }
 

@@ -16,6 +16,9 @@ namespace UnityChan
         Vector3 stopvelo = default;                 //停止する直前の速度を取得する         
         public bool pauseresum = false;             //停止した際に動かないようにするため
         public List<GameObject> enemyList = new List<GameObject>();
+        public bool _nonPlayerCharacter = true;
+        Vector3 walkSpeed = default;
+        private PlayerNavMesh _nav;
 
         // 以下キャラクターコントローラ用パラメタ
         // 前進速度
@@ -25,12 +28,13 @@ namespace UnityChan
         // 旋回速度
         public float rotateSpeed = 2.0f;
         private Rigidbody _rb;
-        private Animator _anim;                          
+        private Animator _anim;
 
         void Start()
         {
             _anim = GetComponent<Animator>();
             _rb = GetComponent<Rigidbody>();
+            _nav = GetComponent<PlayerNavMesh>();
         }
 
 
@@ -40,8 +44,9 @@ namespace UnityChan
             float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
 
-            if (!pauseresum)
+            if (!pauseresum && !_nonPlayerCharacter)
             {
+
                 GameObject.FindObjectOfType<PauseMenuController>().GameBack();
 
                 Vector3 dir = Vector3.forward * v + Vector3.right * h;
@@ -61,10 +66,9 @@ namespace UnityChan
                     this.transform.rotation = Quaternion.Slerp(this.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
 
                     Vector3 velo = dir.normalized * forwardSpeed; // 入力した方向に移動する
-                    velo.y = _rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
                     _rb.velocity = velo;   // 計算した速度ベクトルをセットする
                 }
-                Vector3 walkSpeed = _rb.velocity;
+                walkSpeed = _rb.velocity;
                 walkSpeed.y = 0;
                 _anim.SetFloat("Speed", walkSpeed.magnitude);
             }
@@ -87,7 +91,7 @@ namespace UnityChan
             //_pauseMenu.offCommandMenu -= ResumCommand;
         }
 
-        void PauseCommand(bool onPause) 
+        void PauseCommand(bool onPause)
         {
             if (onPause)
             {
@@ -114,5 +118,19 @@ namespace UnityChan
             _rb.velocity = stopvelo;
             _anim.enabled = true;
         }
+        public void PlayCharacterNow()
+        {
+            _nonPlayerCharacter = false;
+            _nav.PlayNow();
+        }
+
+        public void NoPlay()
+        {
+            _nonPlayerCharacter = true;
+            walkSpeed = Vector3.zero;
+            _anim.SetFloat("Speed", walkSpeed.magnitude);
+            _nav.NOPlay();
+        }
+
     }
 }

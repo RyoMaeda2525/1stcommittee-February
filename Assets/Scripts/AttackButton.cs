@@ -21,7 +21,7 @@ public class AttackButton : MonoBehaviour
     private void Awake()
     {
         lineR = GetComponent<LineRenderer>();
-        plaNav = GameObject.FindObjectOfType<PlayerNavMesh>();
+        plaNav = GameObject.Find("Unitychan").GetComponent<PlayerNavMesh>();
         acs = GameObject.FindObjectOfType<ActionSlider>();
         pauseM = GameObject.FindObjectOfType<PauseMenuController>();
         eventS = GameObject.Find("EventSystem").GetComponent<EventSystem>();

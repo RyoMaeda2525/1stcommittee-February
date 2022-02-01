@@ -11,8 +11,6 @@ public class Damage : MonoBehaviour
     public int defense = 40;
     int hit = 0;
     Tweener tweener = default;
-    bool _stop = false;
-    bool _Alpha = false;
     int tempHp = 0;
     PauseMenuController _pauseMenu = default;
     float hpChangeInterval = 1.5f;
@@ -30,6 +28,7 @@ public class Damage : MonoBehaviour
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
         //hitPoint = hitpointMax;
         tempHp = hitpointMax;
+        HpMaxValue();
         MaxHPText();
     }
 
@@ -72,17 +71,15 @@ public class Damage : MonoBehaviour
 
     private void OnDestroy()
     {
-        GameObject.FindObjectOfType<EnemyChecker>().Destroy(this.gameObject);
+        if (gameObject.tag != "Player") 
+        {
+            GameObject.FindObjectOfType<EnemyChecker>().Destroy(this.gameObject);
+        }  
     }
 
     private void FixedUpdate()
     {
         canvas.transform.LookAt(Camera.main.transform.position);
-
-        if (gameObject.tag == "Player")
-        {
-            hpSlider.maxValue = hitpointMax;
-        }
     }
 
     public void ChangeValue()
@@ -98,7 +95,7 @@ public class Damage : MonoBehaviour
             tweener = DOTween.To(() => hpSlider.value, // 連続的に変化させる対象の値
             x => hpSlider.value = x, // 変化させた値 x をどう処理するかを書く
             hitPoint, // x をどの値まで変化させるか指示する
-            hpChangeInterval);/*.OnComplete(() => Debug.Log("完了"));// 何秒かけて変化させるか指示す*/
+            hpChangeInterval).OnComplete(() => Debug.Log("完了"));// 何秒かけて変化させるか指示す*/
         }
 
         private void OnEnable() //ゲームに入ると加わる
@@ -116,28 +113,21 @@ public class Damage : MonoBehaviour
         if (onPause)
         {
             tweener.Pause();
-            _stop = true;
         }
         else
         {
             tweener.Play();
-            _stop = false;
         }
-    }
-
-    public void Alpha()
-    {
-        _Alpha = true;
-    }
-
-    public void NonAlpha()
-    {
-        _Alpha = false;
     }
 
     public void MaxHPText() 
     {
         if(gameObject.tag == "Player")
         maxhpText.text = hitpointMax.ToString("000");
+    }
+
+    public void HpMaxValue() 
+    {
+       hpSlider.maxValue = hitpointMax;
     }
 }

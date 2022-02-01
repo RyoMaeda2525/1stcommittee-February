@@ -11,7 +11,6 @@ public class EnemyChecker : MonoBehaviour
         if (other.tag == "Enemy")
         {
             enemyList.Add(other.gameObject);
-            other.GetComponent<Damage>().Alpha();
         }
     }
 
@@ -20,7 +19,6 @@ public class EnemyChecker : MonoBehaviour
         if (other.tag == "Enemy")
         {
             enemyList.Remove(other.gameObject);
-            other.GetComponent <Damage>().NonAlpha();
         }
     }
 
