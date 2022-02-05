@@ -1,17 +1,20 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class PauseMenuController : MonoBehaviour
 {
     static bool _commandPause = false;
-    [SerializeField] GameObject commandPanel = default;//コマンドを出すパネル
+    [SerializeField] GameObject[] commandPanels = new GameObject[3];//コマンドを出すパネル
     public event Action<bool> onCommandMenu;
     public event Action<bool> offCommandMenu;
-    [SerializeField] GameObject attackCommandButton = default;
+    [Tooltip("パネルなどの要素数"), SerializeField]
+    int activeCount = 0;
+    [SerializeField] GameObject[] attackCommandButtons = new GameObject[3];
     [SerializeField] GameObject attackCommandPanel = default;
     ForceSelector commandForce = default;
+    [Tooltip("現在操作可能なキャラの数字"), SerializeField]
+    int activeChara = 0;
     [Tooltip("プレイヤーキャラを取得するため"),SerializeField]
     ChangePlayer cp = default;
     List<GameObject> enemyList = new List<GameObject>();
@@ -22,50 +25,72 @@ public class PauseMenuController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        commandForce = commandPanel.GetComponent<ForceSelector>();
+        commandForce = commandPanels[cp.nowChara].GetComponent<ForceSelector>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        float h = Input.GetAxis("Horizontal");
+
         // 左クリックしたら一時停止・再開しつつコマンドメニューを切り替える
         if (Input.GetButtonDown("Fire1"))
         {
             if (!_commandPause && _gameBack)
+            {
                 OnCommandMenu();
-                _gameBack = false;
+                activeChara = cp.nowChara;
+            }
+            _gameBack = false;
         }
-        
+
         if (Input.GetButtonDown("Fire2"))
         {
             if (attackCommandPanel.activeSelf)
             {
                 attackCommandPanel.SetActive(false);
-                commandPanel.SetActive(true);
+                commandPanels[activeChara].SetActive(true);
                 commandForce.ForceSelect();
                 foreach (Transform t in attackCommandPanel.transform)
                 {
                     Destroy(t.gameObject);
                 }
             }
-           else if (_commandPause)
+            else if (_commandPause)
                 OnCommandMenu();
         }
+
+
+        if (commandPanels[activeChara].activeSelf) 
+        {
+            if (h > 0 && 0.1 > h) 
+            {
+                commandPanels[activeChara].SetActive(false);
+                activeChara++;
+                if (activeChara > activeCount) 
+                {
+                    activeChara = 0;
+                }
+                commandPanels[activeChara].SetActive(true);
+            }
+        }
     }
+    
     void OnCommandMenu()
     {
+        Debug.Log("Pause");
         if (!_commandPause)
         {
-            commandPanel.SetActive(true);
+            commandPanels[activeChara].SetActive(true);
             _commandPause = true;
             commandForce.ForceSelect();
             onCommandMenu(_commandPause);  // これで変数に代入した関数を全て呼び出せる
         }
         else
         {
-            if (commandPanel)
+            if (commandPanels[activeChara])
             {
-                commandPanel.SetActive(false);
+                commandPanels[activeChara].SetActive(false);
                 _commandPause = false;
                 onCommandMenu(_commandPause);  
             }          
@@ -74,14 +99,14 @@ public class PauseMenuController : MonoBehaviour
 
     public void AttackCommand()
     {
-        GameObject nowchara = cp.charaList[cp.CharaNumber()] ;
+        GameObject nowchara = cp.charaList[cp.nowChara] ;
         enemyList =  nowchara.transform.Find("EnemyChecker").GetComponent<EnemyChecker>().GetEnemy();
-        commandPanel.SetActive(false);
+        commandPanels[activeChara].SetActive(false);
         attackCommandPanel.SetActive(true);
         // 敵の数だけButtonををパネルの子オブジェクトとして生成する
         for (int i = 0; i < enemyList.Count; i++)
         {
-            GameObject go =  Instantiate(attackCommandButton);
+            GameObject go =  Instantiate(attackCommandButtons[activeChara]);
             attackButtonScript = go.GetComponent<AttackButton>();
             attackButtonScript.EnemySet(enemyList[i]);
             go.transform.SetParent(attackCommandPanel.transform);
@@ -95,7 +120,7 @@ public class PauseMenuController : MonoBehaviour
         {
             Destroy(t.gameObject);
         }
-        commandPanel.SetActive(false);
+        commandPanels[activeChara].SetActive(false);
         _commandPause = false;
         onCommandMenu(_commandPause);
     }
