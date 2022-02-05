@@ -7,19 +7,28 @@ using UnityEngine;
 public class RandomMovement : MonoBehaviour
 {
     private float timeCount;
-    public float startDistance = 20f;
+    [Tooltip("行動範囲の中心点"), SerializeField]
     public Vector3 startPosition = default;
+    [Tooltip("行動範囲の半径"), SerializeField]
+    public float Actionradius = default;
+    [Tooltip("行動の制限距離"), SerializeField]
+    public float ActionDistance = 20f;
     private NavMeshAgent navMeshAgent;
     private NavMeshHit navMeshHit;
+    [Tooltip("次の地点を選ぶまでの時間"), SerializeField]
     public float selectInterval = 10;
     Animator _anim = default;
     bool _stop = false;
-    public bool _playerAttack = true;
-    PauseMenuController _pauseMenu = default;
-    Vector3 stopvelo = default;
-    public int Atk = 0;
-    float interval = 3f;
-    public float critical = 0.01f;
+    bool _playerAttack = true; 
+    PauseMenuController _pauseMenu = default; //停止するために必要
+    Vector3 stopvelo = default; //停止する前の速度
+    [Tooltip("攻撃力"), SerializeField]
+    public int Atk = 0;　
+    float interval = 3f; //攻撃までの時間計測
+    [Tooltip("攻撃間隔"), SerializeField]
+    float attackInterval = 5;
+    [Tooltip("クリティカル値"), SerializeField]
+    public float critical = 0f;　
 
     void Start()
     {
@@ -48,7 +57,8 @@ public class RandomMovement : MonoBehaviour
             _anim.SetFloat("angle", pov);
             _anim.SetFloat("Speed", navMeshAgent.velocity.magnitude);
 
-            if (Vector3.Distance(this.transform.position, startPosition) > startDistance && _playerAttack == true)
+            if (Vector3.Distance(this.transform.position, startPosition) > 
+ActionDistance && _playerAttack == true)
             {
                 Debug.Log("範囲外");
                 _playerAttack = false;
@@ -60,7 +70,8 @@ public class RandomMovement : MonoBehaviour
 
     private void SetDestination()
     {
-        Vector3 randomPos = new Vector3(Random.Range(startPosition.x - 10, startPosition.x + 10), 0, Random.Range(startPosition.z - 10, startPosition.z + 10));
+        Vector3 randomPos = new Vector3(Random.Range(startPosition.x - Actionradius, startPosition.x + Actionradius), 0, 
+                                                                        Random.Range(startPosition.z - Actionradius, startPosition.z + Actionradius));
         NavMesh.SamplePosition(randomPos, out navMeshHit, 10, 1);
         navMeshAgent.destination = navMeshHit.position;
     }
@@ -116,7 +127,7 @@ public class RandomMovement : MonoBehaviour
             navMeshAgent.destination = collision.transform.position;
             transform.LookAt(collision.transform.position);
             interval += Time.deltaTime;
-            if (interval > 5)
+            if (interval > attackInterval)
             {
                 interval = 0;
                 _anim.Play("Attack");

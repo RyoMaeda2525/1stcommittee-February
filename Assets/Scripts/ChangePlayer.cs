@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class ChangePlayer : MonoBehaviour
 {
-	//　現在どのキャラクターを操作しているか
-	public int nowChara = 0;
+	//現在どのキャラクターを操作しているか
+	internal int nowChara = 0;
 	//　操作可能なゲームキャラクター
 	[SerializeField]
 	public List<GameObject> charaList;
@@ -47,4 +47,10 @@ public class ChangePlayer : MonoBehaviour
 		cameraList[nextChara].GetComponent<CinemachineFreeLook>().Priority = 12;
 		cameraList[tempNowChara].GetComponent<CinemachineFreeLook>().Priority = 11;
 	}
+
+	internal  int CharaNumber() 
+	{
+		return nowChara; 
+	}
+
 }

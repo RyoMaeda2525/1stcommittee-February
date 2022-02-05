@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class EnemyChecker : MonoBehaviour
 {
-    public static List<GameObject> enemyList = new List<GameObject>();
+    internal  List<GameObject> enemyList = new List<GameObject>();
+
     // Start is called before the first frame update
     private void OnTriggerEnter(Collider other)
     {
@@ -22,14 +23,14 @@ public class EnemyChecker : MonoBehaviour
         }
     }
 
-    internal static List<GameObject> GetEnemy()
+    internal  List<GameObject> GetEnemy()
     {
         return enemyList;
     }
 
     public void Destroy(GameObject enemy)
     {
-        if(enemyList.Contains(enemy) == true)
+        if (enemyList.Contains(enemy) == true)
         {
             enemyList.Remove(enemy);
         }

@@ -6,13 +6,14 @@ using System;
 public class PauseMenuController : MonoBehaviour
 {
     static bool _commandPause = false;
-    static bool _commandResum = false;
     [SerializeField] GameObject commandPanel = default;//コマンドを出すパネル
     public event Action<bool> onCommandMenu;
     public event Action<bool> offCommandMenu;
     [SerializeField] GameObject attackCommandButton = default;
     [SerializeField] GameObject attackCommandPanel = default;
     ForceSelector commandForce = default;
+    [Tooltip("プレイヤーキャラを取得するため"),SerializeField]
+    ChangePlayer cp = default;
     List<GameObject> enemyList = new List<GameObject>();
     AttackButton attackButtonScript = default;
     bool _gameBack = true;
@@ -73,7 +74,8 @@ public class PauseMenuController : MonoBehaviour
 
     public void AttackCommand()
     {
-        enemyList =  EnemyChecker.GetEnemy();
+        GameObject nowchara = cp.charaList[cp.CharaNumber()] ;
+        enemyList =  nowchara.transform.Find("EnemyChecker").GetComponent<EnemyChecker>().GetEnemy();
         commandPanel.SetActive(false);
         attackCommandPanel.SetActive(true);
         // 敵の数だけButtonををパネルの子オブジェクトとして生成する

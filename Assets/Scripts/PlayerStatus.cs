@@ -10,6 +10,7 @@ public class PlayerStatus : MonoBehaviour
     ActionSlider acs = default;
     List<GameObject> enemyList = new List<GameObject>();
     GameObject[] enemyTarget = new GameObject[1];
+    EnemyChecker ec = default;
     
 
     // Update is called once per frame
@@ -29,7 +30,7 @@ public class PlayerStatus : MonoBehaviour
 
     public void Hit()
     {
-        enemyList = EnemyChecker.GetEnemy();
+        enemyList = GetComponent<EnemyChecker>().GetEnemy(); 
         GetComponent<PlayerNavMesh>().TargetCancel();
         enemyTarget[0].GetComponent<Damage>().HitAttack(atk ,critical);
     }
