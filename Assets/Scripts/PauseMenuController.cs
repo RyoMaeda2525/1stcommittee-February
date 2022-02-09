@@ -5,17 +5,18 @@ using UnityEngine;
 public class PauseMenuController : MonoBehaviour
 {
     static bool _commandPause = false;
-    [SerializeField] GameObject[] commandPanels = new GameObject[3];//コマンドを出すパネル
+    [SerializeField] GameObject commandPanel = default;//コマンドを出すパネル
     public event Action<bool> onCommandMenu;
     public event Action<bool> offCommandMenu;
     [Tooltip("パネルなどの要素数"), SerializeField]
     int activeCount = 0;
     [SerializeField] GameObject[] attackCommandButtons = new GameObject[3];
     [SerializeField] GameObject attackCommandPanel = default;
+    [SerializeField] GameObject[] images = new GameObject[3];
     ForceSelector commandForce = default;
     [Tooltip("現在操作可能なキャラの数字"), SerializeField]
     int activeChara = 0;
-    [Tooltip("プレイヤーキャラを取得するため"),SerializeField]
+    [Tooltip("プレイヤーキャラを取得するため"), SerializeField]
     ChangePlayer cp = default;
     List<GameObject> enemyList = new List<GameObject>();
     AttackButton attackButtonScript = default;
@@ -25,7 +26,8 @@ public class PauseMenuController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        commandForce = commandPanels[cp.nowChara].GetComponent<ForceSelector>();
+        activeChara = cp.nowChara;
+        commandForce = commandPanel.GetComponent<ForceSelector>();
     }
 
     // Update is called once per frame
@@ -38,8 +40,8 @@ public class PauseMenuController : MonoBehaviour
         {
             if (!_commandPause && _gameBack)
             {
-                OnCommandMenu();
                 activeChara = cp.nowChara;
+                OnCommandMenu();
             }
             _gameBack = false;
         }
@@ -49,7 +51,8 @@ public class PauseMenuController : MonoBehaviour
             if (attackCommandPanel.activeSelf)
             {
                 attackCommandPanel.SetActive(false);
-                commandPanels[activeChara].SetActive(true);
+                commandPanel.SetActive(true);
+                images[activeChara].SetActive(true);
                 commandForce.ForceSelect();
                 foreach (Transform t in attackCommandPanel.transform)
                 {
@@ -61,72 +64,87 @@ public class PauseMenuController : MonoBehaviour
         }
 
 
-        if (commandPanels[activeChara].activeSelf) 
+        if (commandPanel.activeSelf)
         {
-            if (h > 0 && 0.1 > h) 
+            if (Input.GetButtonDown("Horizontal"))
             {
-                commandPanels[activeChara].SetActive(false);
-                activeChara++;
-                if (activeChara > activeCount) 
+                images[activeChara].SetActive(false);
+                if (h > 0)
                 {
-                    activeChara = 0;
+                    activeChara++;
+                    if (activeChara > activeCount)
+                    {
+                        activeChara = 0;
+                    }
                 }
-                commandPanels[activeChara].SetActive(true);
+                else
+                {
+                    if (activeChara == 0)
+                    {
+                        activeChara = activeCount;
+                    }
+                    else
+                    activeChara--;
+                }
+                
+                images[activeChara].SetActive(true);
             }
         }
     }
-    
+
     void OnCommandMenu()
     {
-        Debug.Log("Pause");
         if (!_commandPause)
         {
-            commandPanels[activeChara].SetActive(true);
+            commandPanel.SetActive(true);
+            images[activeChara].SetActive(true);
             _commandPause = true;
             commandForce.ForceSelect();
             onCommandMenu(_commandPause);  // これで変数に代入した関数を全て呼び出せる
         }
         else
         {
-            if (commandPanels[activeChara])
+            if (commandPanel)
             {
-                commandPanels[activeChara].SetActive(false);
+                images[activeChara].SetActive(false);
+                commandPanel.SetActive(false);
                 _commandPause = false;
-                onCommandMenu(_commandPause);  
-            }          
+                onCommandMenu(_commandPause);
+            }
         }
     }
 
     public void AttackCommand()
     {
-        GameObject nowchara = cp.charaList[cp.nowChara] ;
-        enemyList =  nowchara.transform.Find("EnemyChecker").GetComponent<EnemyChecker>().GetEnemy();
-        commandPanels[activeChara].SetActive(false);
+        GameObject nowchara = cp.charaList[cp.nowChara];
+        enemyList = nowchara.transform.Find("EnemyChecker").GetComponent<EnemyChecker>().GetEnemy();
+        commandPanel.SetActive(false);
+        images[activeChara].SetActive(false);
         attackCommandPanel.SetActive(true);
         // 敵の数だけButtonををパネルの子オブジェクトとして生成する
         for (int i = 0; i < enemyList.Count; i++)
         {
-            GameObject go =  Instantiate(attackCommandButtons[activeChara]);
+            GameObject go = Instantiate(attackCommandButtons[activeChara]);
             attackButtonScript = go.GetComponent<AttackButton>();
             attackButtonScript.EnemySet(enemyList[i]);
             go.transform.SetParent(attackCommandPanel.transform);
         }
     }
 
-    public void OnAttack() 
+    public void OnAttack()
     {
         attackCommandPanel.SetActive(false);
         foreach (Transform t in attackCommandPanel.transform)
         {
             Destroy(t.gameObject);
         }
-        commandPanels[activeChara].SetActive(false);
+        commandPanel.SetActive(false);
         _commandPause = false;
         onCommandMenu(_commandPause);
     }
 
-    public void GameBack() 
+    public void GameBack()
     {
-       _gameBack = true;
+        _gameBack = true;
     }
 }

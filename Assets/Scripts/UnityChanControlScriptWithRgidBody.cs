@@ -11,14 +11,14 @@ namespace UnityChan
 
     public class UnityChanControlScriptWithRgidBody : MonoBehaviour
     {
-
+        [Tooltip("プレイヤーのNavmeshを切り替えるスクリプト"), SerializeField]
+        private PlayerNavMesh _nav = default;
         PauseMenuController _pauseMenu = default;   //一時停止の命令を取得する
         Vector3 stopvelo = default;                 //停止する直前の速度を取得する         
         public bool pauseresum = false;             //停止した際に動かないようにするため
         public List<GameObject> enemyList = new List<GameObject>();
         public bool _nonPlayerCharacter = true;
         Vector3 walkSpeed = default;
-        private PlayerNavMesh _nav;
 
         // 以下キャラクターコントローラ用パラメタ
         // 前進速度
@@ -72,6 +72,10 @@ namespace UnityChan
                 walkSpeed.y = 0;
                 _anim.SetFloat("Speed", walkSpeed.magnitude);
             }
+            else if (!pauseresum) 
+            {
+                _rb.velocity = Vector3.zero;
+            }
         }
 
         private void Awake()　// この処理は Start やると遅いので Awake でやっている
@@ -109,14 +113,14 @@ namespace UnityChan
         {
             stopvelo = _rb.velocity;
             _rb.velocity = Vector3.zero;
-            _anim.enabled = false;
+            _anim.speed = 0;
 
         }
 
         void Resum() //再開
         {
             _rb.velocity = stopvelo;
-            _anim.enabled = true;
+            _anim.speed = 1;
         }
         public void PlayCharacterNow()
         {
@@ -131,6 +135,5 @@ namespace UnityChan
             _anim.SetFloat("Speed", walkSpeed.magnitude);
             _nav.NOPlay();
         }
-
     }
 }

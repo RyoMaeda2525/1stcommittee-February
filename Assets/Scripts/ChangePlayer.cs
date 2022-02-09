@@ -6,7 +6,10 @@ using UnityEngine;
 public class ChangePlayer : MonoBehaviour
 {
 	//現在どのキャラクターを操作しているか
+	[SerializeField]
 	internal int nowChara = 0;
+	internal int nextChara = 0;
+	internal int notChara = 0;
 	//　操作可能なゲームキャラクター
 	[SerializeField]
 	public List<GameObject> charaList;
@@ -15,9 +18,22 @@ public class ChangePlayer : MonoBehaviour
 
 	void Start()
 	{
+		nextChara = nowChara + 1;
+		if (nextChara >= charaList.Count)
+        {
+			nextChara = 0;
+        }
+		notChara = nextChara + 1;
+		if (notChara >= charaList.Count)
+		{
+			notChara = 0;
+		}
 		//　最初の操作キャラクターを0番目のキャラクターにする
 		charaList[nowChara].GetComponent<UnityChan.UnityChanControlScriptWithRgidBody>().PlayCharacterNow();
 		cameraList[nowChara].GetComponent<CinemachineFreeLook>().Priority = 12;
+		//他のキャラクターが操作キャラを追うようにする
+		NotPlay(notChara);
+		NotPlay(nextChara);
 	}
 
 	void Update()
@@ -25,32 +41,49 @@ public class ChangePlayer : MonoBehaviour
         //　Qキーが押されたら操作キャラクターを次のキャラクターに変更する
         if (Input.GetKeyDown("q"))
         {
-            ChangeCharacter(nowChara);
+            ChangeCharacter();
         }
     }
 
 	//　操作キャラクター変更メソッド
-	void ChangeCharacter(int tempNowChara)
-	{ 
-		//　次のキャラクターの番号を設定
-		var nextChara = tempNowChara + 1;
-		if (nextChara >= charaList.Count)
-		{
-			nextChara = 0;
-		}
-		//　現在のキャラクター番号を保持する
-		nowChara = nextChara;
-		//　現在操作しているキャラクターを動かなくする
-		charaList[tempNowChara].GetComponent<UnityChan.UnityChanControlScriptWithRgidBody>().NoPlay();
+	void ChangeCharacter()
+	{
+		//var nowChara = tempNowChara + 1;
+		//if (nowChara >= charaList.Count)
+		//{
+		//	nowChara = 0;
+		//}
+		//var notChara = nowChara + 1;
+		//if (notChara >= charaList.Count)
+		//{
+		//	notChara = 0;
+		//}
+		NextChara();
 		//　次のキャラクターを動かせるようにする
-		charaList[nextChara].GetComponent<UnityChan.UnityChanControlScriptWithRgidBody>().PlayCharacterNow();
-		cameraList[nextChara].GetComponent<CinemachineFreeLook>().Priority = 12;
-		cameraList[tempNowChara].GetComponent<CinemachineFreeLook>().Priority = 11;
+		charaList[nowChara].GetComponent<UnityChan.UnityChanControlScriptWithRgidBody>().PlayCharacterNow();
+		cameraList[nowChara].GetComponent<CinemachineFreeLook>().Priority = 12;
+		//　現在操作しているキャラクターを動かなくする
+		NotPlay(nextChara);
+		NotPlay(notChara);
 	}
 
 	internal  int CharaNumber() 
 	{
 		return nowChara; 
+	}
+
+    private void NotPlay(int x)
+    {
+		charaList[x].GetComponent<UnityChan.UnityChanControlScriptWithRgidBody>().NoPlay();
+		cameraList[x].GetComponent<CinemachineFreeLook>().Priority = 11;
+	}
+
+    private void NextChara() //　次のキャラクターの番号を設定
+	{
+		int tempNowChara = nowChara;
+		nowChara = nextChara;
+		nextChara = notChara;
+		notChara = tempNowChara;
 	}
 
 }

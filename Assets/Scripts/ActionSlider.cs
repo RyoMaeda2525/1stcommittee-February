@@ -13,6 +13,7 @@ public class ActionSlider : MonoBehaviour
     Tweener tweener = default;
     PlayerStatus plst = default;
     Image background = default;
+    GameObject enemySave = default;
     bool _backgroundAlpha = false;
 
     private void Awake() // この処理は Start やると遅いので Awake でやっている
@@ -62,6 +63,10 @@ public class ActionSlider : MonoBehaviour
         {
             tweener.Kill();
             Reset();
+        }
+        else if (slider.value == 1f) 
+        {
+            
         }
         if (background.color.a != 255)
         {

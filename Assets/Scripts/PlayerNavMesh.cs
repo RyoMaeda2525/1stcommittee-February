@@ -8,6 +8,7 @@ public class PlayerNavMesh : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     [Tooltip("プレイキャラの確認"), SerializeField]
     ChangePlayer chp = default;
+    float navSpeed = 0; //navmeshのスピードを入れる
     public GameObject enemyT = default;
     bool _enemytarget = false;
     Animator _anim = default;
@@ -47,8 +48,9 @@ public class PlayerNavMesh : MonoBehaviour
                 }
             }
             navMeshAgent.destination = enemyT.transform.position;
-        }
-        _anim.SetFloat("NavSpeed", navMeshAgent.velocity.magnitude);
+            navSpeed = navMeshAgent.velocity.magnitude;
+            _anim.SetFloat("NavSpeed", navSpeed);
+        }     
     }
 
     public void Enemydiscover(GameObject enemy)
@@ -112,6 +114,8 @@ public class PlayerNavMesh : MonoBehaviour
     {
         _nonPlay = false;
         navMeshAgent.enabled = false;
+        navSpeed = 0;
+        _anim.SetFloat("NavSpeed", navSpeed);
     }
 
     public void NOPlay()

@@ -86,6 +86,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1441026485, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441026485, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
       propertyPath: avoidancePriority
       value: 50
       objectReference: {fileID: 0}
@@ -112,6 +116,10 @@ PrefabInstance:
     - target: {fileID: 1441026495, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
       propertyPath: maxhpText
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1835088138, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
+      propertyPath: m_Name
+      value: EnemyChecker
       objectReference: {fileID: 0}
     - target: {fileID: 904271973989946062, guid: 412b92d4feeb9c548bfa98f62c4d1022,
         type: 3}
@@ -212,6 +220,7 @@ PrefabInstance:
     - {fileID: 11400002, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
     - {fileID: 11400000, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
     - {fileID: 11400004, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
+    - {fileID: 1441026489, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
 --- !u!4 &131394425908290398 stripped
 Transform:

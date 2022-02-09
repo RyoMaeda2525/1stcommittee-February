@@ -16,16 +16,7 @@ public class MouseCursor : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        if (onCursor)//マウスカーソルを消す処理
-        {
-            Cursor.visible = false;
-        }
-        else //マウスカーソルを出す
-        {
-            Cursor.visible = true;
-        }
-        
+    {   
         float y = Input.GetAxis("Mouse ScrollWheel"); //視野角をマウスホイールで変える
         if(y > 0)
         {  if(cinema.m_Lens.FieldOfView <= 99.5f)
@@ -45,9 +36,8 @@ public class MouseCursor : MonoBehaviour
 
     void OnEnable()
     {
-        // マウスカーソルを消すには、以下の行をアンコメントする
-        //Cursor.visible = false;
-        onCursor = true;
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void OnDisable()
