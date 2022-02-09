@@ -6,8 +6,6 @@ using Cinemachine;
 public class MouseCursor : MonoBehaviour
 {
     CinemachineFreeLook cinema = default; //シネマシーンを取得
-    bool onCursor = false; //マウスカーソルを制御する
-    // Start is called before the first frame update
     void Start()
     {
         cinema = GetComponent<CinemachineFreeLook>();

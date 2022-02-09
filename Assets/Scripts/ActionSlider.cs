@@ -49,6 +49,11 @@ public class ActionSlider : MonoBehaviour
     /// </summary>
     public void Reset()
     {
+        if (enemySave != null) 
+        {
+            ChangeValue(enemySave);
+            return;
+        }
         slider.value = 0f;
         _backgroundAlpha = false;
     }
@@ -66,7 +71,7 @@ public class ActionSlider : MonoBehaviour
         }
         else if (slider.value == 1f) 
         {
-            
+            enemySave = enemy;
         }
         if (background.color.a != 255)
         {

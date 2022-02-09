@@ -7,12 +7,13 @@ public class PauseMenuController : MonoBehaviour
     static bool _commandPause = false;
     [SerializeField] GameObject commandPanel = default;//コマンドを出すパネル
     public event Action<bool> onCommandMenu;
-    public event Action<bool> offCommandMenu;
     [Tooltip("パネルなどの要素数"), SerializeField]
     int activeCount = 0;
     [SerializeField] GameObject[] attackCommandButtons = new GameObject[3];
     [SerializeField] GameObject attackCommandPanel = default;
     [SerializeField] GameObject[] images = new GameObject[3];
+    [Tooltip("選択しているボタンを指すカーソル"), SerializeField]
+    GameObject cursorImage = default;
     ForceSelector commandForce = default;
     [Tooltip("現在操作可能なキャラの数字"), SerializeField]
     int activeChara = 0;
@@ -42,6 +43,7 @@ public class PauseMenuController : MonoBehaviour
             {
                 activeChara = cp.nowChara;
                 OnCommandMenu();
+                cursorImage.SetActive(true);
             }
             _gameBack = false;
         }
@@ -86,7 +88,6 @@ public class PauseMenuController : MonoBehaviour
                     else
                     activeChara--;
                 }
-                
                 images[activeChara].SetActive(true);
             }
         }
@@ -109,6 +110,7 @@ public class PauseMenuController : MonoBehaviour
                 images[activeChara].SetActive(false);
                 commandPanel.SetActive(false);
                 _commandPause = false;
+                cursorImage.SetActive(false);
                 onCommandMenu(_commandPause);
             }
         }
@@ -140,6 +142,7 @@ public class PauseMenuController : MonoBehaviour
         }
         commandPanel.SetActive(false);
         _commandPause = false;
+        cursorImage.SetActive(false);
         onCommandMenu(_commandPause);
     }
 

@@ -20,8 +20,6 @@ public class Damage : MonoBehaviour
     [SerializeField] private GameObject canvas;//親にするキャンバスを格納
     [SerializeField] GameObject pivot = default;
     [SerializeField] Slider hpSlider = default;
-    [SerializeField] Image background = default;
-    [SerializeField] Image fill = default;
 
     private void Awake()
     {
@@ -95,7 +93,7 @@ public class Damage : MonoBehaviour
             tweener = DOTween.To(() => hpSlider.value, // 連続的に変化させる対象の値
             x => hpSlider.value = x, // 変化させた値 x をどう処理するかを書く
             hitPoint, // x をどの値まで変化させるか指示する
-            hpChangeInterval).OnComplete(() => Debug.Log("完了"));// 何秒かけて変化させるか指示す*/
+            hpChangeInterval)/*.OnComplete(() => Debug.Log("完了"))*/;// 何秒かけて変化させるか指示す*/
         }
 
         private void OnEnable() //ゲームに入ると加わる

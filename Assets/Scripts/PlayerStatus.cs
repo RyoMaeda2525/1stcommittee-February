@@ -9,9 +9,7 @@ public class PlayerStatus : MonoBehaviour
     public bool _enemyT = false;
     ActionSlider acs = default;
     List<GameObject> enemyList = new List<GameObject>();
-    GameObject[] enemyTarget = new GameObject[1];
-    EnemyChecker ec = default;
-    
+    GameObject[] enemyTarget = new GameObject[1]; 
 
     // Update is called once per frame
     private void Start()

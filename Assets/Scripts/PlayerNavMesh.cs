@@ -10,7 +10,6 @@ public class PlayerNavMesh : MonoBehaviour
     ChangePlayer chp = default;
     float navSpeed = 0; //navmeshのスピードを入れる
     public GameObject enemyT = default;
-    bool _enemytarget = false;
     Animator _anim = default;
     PauseMenuController _pauseMenu = default;
     bool _stop = false;
@@ -20,16 +19,21 @@ public class PlayerNavMesh : MonoBehaviour
     private void Awake()
     {
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
         _anim = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        Debug.Log(gameObject.name);
         enemyT = chp.charaList[0];
         Stop();
     }
+
+    //void Start()
+    //{
+    //    _anim = GetComponent<Animator>();
+    //    navMeshAgent = GetComponent<NavMeshAgent>();
+    //    Debug.Log(gameObject.name);
+    //    enemyT = chp.charaList[0];
+    //    Stop();
+    //}
 
     // Update is called once per frame
     void FixedUpdate()
@@ -50,7 +54,7 @@ public class PlayerNavMesh : MonoBehaviour
             navMeshAgent.destination = enemyT.transform.position;
             navSpeed = navMeshAgent.velocity.magnitude;
             _anim.SetFloat("NavSpeed", navSpeed);
-        }     
+        }
     }
 
     public void Enemydiscover(GameObject enemy)
@@ -121,7 +125,9 @@ public class PlayerNavMesh : MonoBehaviour
     public void NOPlay()
     {
         _nonPlay = true;
+
         navMeshAgent.enabled = true;
+        Debug.Log(this.gameObject.name);
         enemyT = chp.charaList[chp.nowChara];
     }
 }

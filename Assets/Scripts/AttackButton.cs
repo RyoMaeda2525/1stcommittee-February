@@ -14,7 +14,6 @@ public class AttackButton : MonoBehaviour
     GameObject unityChan = default;
     ActionSlider acs = default;
     string enemyName = "None";
-    RandomMovement rm = default;
     PauseMenuController pauseM = default;
     PlayerNavMesh plaNav = default;
 
