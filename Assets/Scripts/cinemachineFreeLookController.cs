@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class cinemachineFreeLookController: MonoBehaviour
+public class CinemachineFreeLookController: MonoBehaviour
 {
 	public bool xInversion, yInversion;
 

@@ -9,7 +9,7 @@ public class PlayerNavMesh : MonoBehaviour
     [Tooltip("プレイキャラの確認"), SerializeField]
     ChangePlayer chp = default;
     float navSpeed = 0; //navmeshのスピードを入れる
-    public GameObject enemyT = default;
+    private GameObject enemyT = default;
     Animator _anim = default;
     PauseMenuController _pauseMenu = default;
     bool _stop = false;
@@ -21,19 +21,9 @@ public class PlayerNavMesh : MonoBehaviour
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
         _anim = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        Debug.Log(gameObject.name);
         enemyT = chp.charaList[0];
         Stop();
     }
-
-    //void Start()
-    //{
-    //    _anim = GetComponent<Animator>();
-    //    navMeshAgent = GetComponent<NavMeshAgent>();
-    //    Debug.Log(gameObject.name);
-    //    enemyT = chp.charaList[0];
-    //    Stop();
-    //}
 
     // Update is called once per frame
     void FixedUpdate()
@@ -45,11 +35,18 @@ public class PlayerNavMesh : MonoBehaviour
                 if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0 && !navMeshAgent.isStopped)
                 {
                     navMeshAgent.isStopped = true;
+                    if(enemyT != null)
+                      transform.LookAt(null);
                 }
                 else if (!_stop)
                 {
                     Resum();
+                    transform.LookAt(enemyT.transform.position);
                 }
+            }
+            else 
+            { 
+                transform.LookAt(enemyT.transform.position); 
             }
             navMeshAgent.destination = enemyT.transform.position;
             navSpeed = navMeshAgent.velocity.magnitude;
@@ -57,9 +54,19 @@ public class PlayerNavMesh : MonoBehaviour
         }
     }
 
-    public void Enemydiscover(GameObject enemy)
+    public void Attack(GameObject enemy)
     {
         navMeshAgent.enabled = true;
+        navMeshAgent.stoppingDistance = 3f;
+        enemyT = enemy;
+        if (navMeshAgent.isStopped)
+            Resum();
+    }
+
+    public void Magic(GameObject enemy) 
+    {
+        navMeshAgent.enabled = true;
+        navMeshAgent.stoppingDistance = 8f;
         enemyT = enemy;
         if (navMeshAgent.isStopped)
             Resum();
@@ -125,9 +132,8 @@ public class PlayerNavMesh : MonoBehaviour
     public void NOPlay()
     {
         _nonPlay = true;
-
         navMeshAgent.enabled = true;
-        Debug.Log(this.gameObject.name);
+        navMeshAgent.stoppingDistance = 3f;
         enemyT = chp.charaList[chp.nowChara];
     }
 }

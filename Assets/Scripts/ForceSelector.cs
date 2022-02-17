@@ -7,12 +7,7 @@ public class ForceSelector : MonoBehaviour
 {
     //自動選択されるボタン
     public GameObject firstSelected;
-    int i = 0; //0固定だと2回目から反映されないため。
-
-    void Start()
-    {
-        
-    }
+    private int i = 0; //0固定だと2回目から反映されないため。
 
     public void ForceSelect()
     {

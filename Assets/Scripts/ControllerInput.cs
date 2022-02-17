@@ -38,7 +38,7 @@ public class ControllerInput: BaseInputModule
 	/// <summary>
 	/// Name of the horizontal axis for movement (if axis events are used).
 	/// </summary>
-	public string horizontalAxis
+	public string HorizontalAxis
 	{
 		get { return m_HorizontalAxis; }
 		set { m_HorizontalAxis = value; }
@@ -47,19 +47,19 @@ public class ControllerInput: BaseInputModule
 	/// <summary>
 	/// Name of the vertical axis for movement (if axis events are used).
 	/// </summary>
-	public string verticalAxis
+	public string VerticalAxis
 	{
 		get { return m_VerticalAxis; }
 		set { m_VerticalAxis = value; }
 	}
 
-	public string submitButton
+	public string SubmitButton
 	{
 		get { return m_SubmitButton; }
 		set { m_SubmitButton = value; }
 	}
 
-	public string cancelButton
+	public string CancelButton
 	{
 		get { return m_CancelButton; }
 		set { m_CancelButton = value; }

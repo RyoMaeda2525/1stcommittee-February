@@ -5,7 +5,9 @@ using UnityEngine.UI;
 
 public class DamageTextController : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 0.4f;
+    [Tooltip("上に移動するスピードs"),SerializeField] 
+    private float moveSpeed = 0.4f;
+    [Tooltip("消えるまでの時間"),SerializeField]
     private float fadeOutSpeed = 1f;
     Text damageText = default;
     PauseMenuController _pauseMenu = default;

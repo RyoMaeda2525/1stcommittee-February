@@ -6,26 +6,35 @@ using DG.Tweening;
 
 public class ActionSlider : MonoBehaviour
 {
-    [SerializeField] float _changeValueInterval = 6f;
+    [SerializeField]
     Slider slider = default;
-    bool _stop = false;
+    [SerializeField]
+    Image backGround = default;
+    GameObject enemySave = default;
+
     PauseMenuController _pauseMenu = default;
     Tweener tweener = default;
     PlayerStatus plst = default;
-    Image background = default;
-    GameObject enemySave = default;
+    Animator _ani = default;
+
+    [SerializeField] 
+    float _changeValueIntervalSave = 0;
+    [SerializeField]
+    float _changeValueInterval = 6f;
+    int eventSave = 0;
+
+    bool _stop = false;
     bool _backgroundAlpha = false;
 
     private void Awake() // この処理は Start やると遅いので Awake でやっている
     {
         _pauseMenu = GameObject.FindObjectOfType<PauseMenuController>();
-        plst = GameObject.FindObjectOfType<PlayerStatus>();
-        background = transform.Find("Background").GetComponent<Image>();
+        plst = GetComponent<PlayerStatus>();
+        _ani = GetComponent<Animator>();
     }
 
     void Start()
     {
-        slider = GetComponent<Slider>();
         Reset();
     }
 
@@ -38,9 +47,9 @@ public class ActionSlider : MonoBehaviour
         if (!_stop)
         {
             if (_backgroundAlpha)
-                background.color = Color.Lerp(background.color, new Color(0f, 0f, 0f, 255f), 2f * Time.deltaTime);
+                backGround.color = Color.Lerp(backGround.color, new Color(0f, 0f, 0f, 255f), 2f * Time.deltaTime);
             if (!_backgroundAlpha)
-                background.color = Color.Lerp(background.color, new Color(0f, 0f, 0f, 0f), 2f * Time.deltaTime);
+                backGround.color = Color.Lerp(backGround.color, new Color(0f, 0f, 0f, 0f), 2f * Time.deltaTime);
         }
     }
 
@@ -51,7 +60,10 @@ public class ActionSlider : MonoBehaviour
     {
         if (enemySave != null) 
         {
-            ChangeValue(enemySave);
+            ChangeValue(enemySave , _changeValueIntervalSave , eventSave);
+            enemySave = null;
+            _changeValueIntervalSave = 0;
+            eventSave = 10;
             return;
         }
         slider.value = 0f;
@@ -62,29 +74,31 @@ public class ActionSlider : MonoBehaviour
     /// 指定された値までゲージを滑らかに変化させる
     /// </summary>
     /// <param name="value"></param>
-    public void ChangeValue(GameObject enemy)
+    public void ChangeValue(GameObject enemy , float _changeValueInterval, int any)
     {
         if (slider.value > 0f || slider.value < 1f)
         {
-            tweener.Kill();
-            Reset();
+            Kill();  
         }
-        else if (slider.value == 1f) 
+        else if (slider.value == 1f)
         {
             enemySave = enemy;
+            _changeValueIntervalSave = _changeValueInterval;
+            eventSave = any;
+            return;
         }
-        if (background.color.a != 255)
+        if (backGround.color.a != 255)
         {
             _backgroundAlpha = true;
         }
-        tweener = DOTween.To(() => slider.value, // 連続的に変化させる対象の値
-            x => slider.value = x, // 変化させた値 x をどう処理するかを書く
-            1f, // x をどの値まで変化させるか指示する
-            _changeValueInterval)// 何秒かけて変化させるか指示す
-            .OnComplete(() => plst.Attack(enemy));
-    }
+            tweener = DOTween.To(() => slider.value, // 連続的に変化させる対象の値
+                x => slider.value = x, // 変化させた値 x をどう処理するかを書く
+                1f, // x をどの値まで変化させるか指示する
+                _changeValueInterval)// 何秒かけて変化させるか指示す
+                .OnComplete(() => Do(enemy , any));
+        }
 
-    private void OnEnable() //ゲームに入ると加わる
+        private void OnEnable() //ゲームに入ると加わる
     {
         _pauseMenu.onCommandMenu += PauseCommand;
     }
@@ -98,19 +112,38 @@ public class ActionSlider : MonoBehaviour
     {
         if (onPause)
         {
-            tweener.Pause();
-            _stop = true;
+            Pause();
         }
         else
         {
-            tweener.Play();
-            _stop = false;
+            Resum();
         }
     }
 
-    void Attack(GameObject enemy)
+    public void Pause() 
     {
-        plst.Attack(enemy);
+        tweener.Pause();
+        _stop = true;
     }
 
+    void Resum() 
+    {
+        tweener.Play();
+        _stop = false;
+    }
+
+    private void Do(GameObject enemy , int any)
+    {
+        plst.EnemySet(enemy, any);
+    }
+
+    public void Kill() 
+    {
+        tweener.Kill();
+        if (_ani.GetBool("magic"))
+        {
+            _ani.SetBool("magic", false);
+        }
+        Reset();
+    }
 }

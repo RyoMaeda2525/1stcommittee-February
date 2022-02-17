@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class EnemyChecker : MonoBehaviour
 {
+    [SerializeField]
     internal  List<GameObject> enemyList = new List<GameObject>();
 
     // Start is called before the first frame update
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Enemy")
+        if (other.tag == "Enemy" || other.tag == "Boss")
         {
             enemyList.Add(other.gameObject);
         }
@@ -17,7 +18,7 @@ public class EnemyChecker : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Enemy")
+        if (other.tag == "Enemy" || other.tag == "Boss")
         {
             enemyList.Remove(other.gameObject);
         }

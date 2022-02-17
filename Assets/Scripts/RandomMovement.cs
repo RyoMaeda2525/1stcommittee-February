@@ -17,52 +17,72 @@ public class RandomMovement : MonoBehaviour
     private NavMeshHit navMeshHit;
     [Tooltip("次の地点を選ぶまでの時間"), SerializeField]
     public float selectInterval = 10;
+    [Tooltip("プレイヤーが取得する経験値"), SerializeField]
+    int exp = 0;
+    [SerializeField]
+    Golem go = default;
+
+    [Tooltip("振り向くスピード"), SerializeField]
+    float speed = 0;
+
     Animator _anim = default;
-    bool _stop = false;
-    bool _playerAttack = true; 
+    [SerializeField]
     PauseMenuController _pauseMenu = default; //停止するために必要
     Vector3 stopvelo = default; //停止する前の速度
-    [Tooltip("攻撃力"), SerializeField]
-    public int Atk = 0;　
-    float interval = 3f; //攻撃までの時間計測
-    [Tooltip("攻撃間隔"), SerializeField]
-    float attackInterval = 5;
-    [Tooltip("クリティカル値"), SerializeField]
-    public float critical = 0f;　
+
+    bool _stop = false;
+    internal bool _attack = true;
+    bool _start = false;
 
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         SetDestination();
-        navMeshAgent.avoidancePriority = Random.Range(0, 100);
         startPosition = this.transform.position;
         _anim = GetComponent<Animator>();
+        if(gameObject.tag == "Boss") 
+        {
+            navMeshAgent.isStopped = true;
+            _stop = true;
+        }
     }
 
     private void FixedUpdate()
     {
         if (!_stop)
         {
-            timeCount += Time.deltaTime;
-            if (timeCount > selectInterval && !_stop)
-            {
-                _playerAttack = true;
-                SetDestination();
-                timeCount = 0;
-            }
             var diff = navMeshAgent.destination - transform.position;
-            var axis = Vector3.Cross(this.transform.forward, diff).y < 0 ? -1 : 1;
-            var angle = Vector3.Angle(this.transform.forward, diff);
-            var pov = angle * axis;
-            _anim.SetFloat("angle", pov);
-            _anim.SetFloat("Speed", navMeshAgent.velocity.magnitude);
-
-            if (Vector3.Distance(this.transform.position, startPosition) > 
-ActionDistance && _playerAttack == true)
+            timeCount += Time.deltaTime;
+            if (timeCount > selectInterval)
             {
-                Debug.Log("範囲外");
-                _playerAttack = false;
-                interval = 2;
+                _attack = true;
+                timeCount = 0;
+                if (gameObject.tag == "Enemy")
+                SetDestination();
+            }
+            if (gameObject.tag == "Enemy") 
+            {
+                var axis = Vector3.Cross(this.transform.forward, diff).y < 0 ? -1 : 1;
+                var angle = Vector3.Angle(this.transform.forward, diff);
+                var pov = angle * axis;
+                _anim.SetFloat("angle", pov);
+                _anim.SetFloat("Speed", navMeshAgent.velocity.magnitude);
+            }
+            else 
+            {
+                // Quaternion(回転値)を取得
+                Quaternion quaternion = Quaternion.LookRotation(diff);
+                this.transform.rotation = Quaternion.Slerp(this.transform.rotation, quaternion, Time.deltaTime * speed);
+                _anim.SetFloat("Speed", navMeshAgent.velocity.magnitude);
+                var axis = Vector3.Cross(this.transform.forward, diff).y < 0 ? -1 : 1;
+                var angle = Vector3.Angle(this.transform.forward, diff);
+                var pov = angle * axis;
+                _anim.SetFloat("angle", pov);
+            }
+
+            if (Vector3.Distance(this.transform.position, startPosition) > ActionDistance)
+            {
+                _attack = false;
                 SetDestination();
             }
         }
@@ -70,10 +90,19 @@ ActionDistance && _playerAttack == true)
 
     private void SetDestination()
     {
-        Vector3 randomPos = new Vector3(Random.Range(startPosition.x - Actionradius, startPosition.x + Actionradius), 0, 
-                                                                        Random.Range(startPosition.z - Actionradius, startPosition.z + Actionradius));
-        NavMesh.SamplePosition(randomPos, out navMeshHit, 10, 1);
-        navMeshAgent.destination = navMeshHit.position;
+        Vector3 randomPos = default;
+        if (gameObject.tag != "Boss")
+        {
+            randomPos = new Vector3(Random.Range(startPosition.x - Actionradius, startPosition.x + Actionradius), 0,
+                                                            Random.Range(startPosition.z - Actionradius, startPosition.z + Actionradius));
+            NavMesh.SamplePosition(randomPos, out navMeshHit, 10, 1);
+            navMeshAgent.destination = navMeshHit.position;
+        }
+        else 
+        {
+            navMeshAgent.destination = new Vector3(startPosition.x, 0, startPosition.z);
+        }
+        
     }
 
     private void Awake() // この処理は Start やると遅いので Awake でやっている
@@ -96,12 +125,10 @@ ActionDistance && _playerAttack == true)
         if (onPause)
         {
             Pause();
-            _stop = true;
         }
         else
         {
             Resum();
-            _stop = false;
         }
     }
 
@@ -109,31 +136,47 @@ ActionDistance && _playerAttack == true)
     {
         stopvelo = navMeshAgent.velocity;
         navMeshAgent.velocity = Vector3.zero;
-        navMeshAgent.isStopped = true;
         _anim.enabled = false;
+        if (gameObject.tag == "Enemy")
+        {
+            navMeshAgent.isStopped = true;
+            _stop = true;
+        }
+        else if (_start)
+        {
+            navMeshAgent.isStopped = true;
+            _stop = false;
+        }
     }
 
     void Resum() //再開
     {
         navMeshAgent.velocity = stopvelo;
-        navMeshAgent.isStopped = false;
         _anim.enabled = true;
+        if(gameObject.tag == "Enemy") 
+        {
+            navMeshAgent.isStopped = false;
+            _stop = false;
+        }
+        else if (_start)
+        {
+            navMeshAgent.isStopped = false;
+            _stop = false;
+        }
     }
 
-    private void OnTriggerStay(Collider collision)
+    public void StartBoss() 
     {
-        if (collision.gameObject.tag == "Player" && _playerAttack)
-        {
-            navMeshAgent.destination = collision.transform.position;
-            transform.LookAt(collision.transform.position);
-            interval += Time.deltaTime;
-            if (interval > attackInterval)
-            {
-                interval = 0;
-                _anim.Play("Attack");
-                collision.GetComponent<Damage>().HitAttack(Atk, critical);          
-            }
+    
+    }
 
-        }
+    public void Dead() 
+    {
+        _stop = true;
+    }
+
+    private void OnDestroy()
+    {
+        FindObjectOfType<GameManager>().GetExp(exp);
     }
 }

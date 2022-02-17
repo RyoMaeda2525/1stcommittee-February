@@ -27,8 +27,10 @@ namespace UnityChan
         public float backwardSpeed = 2.0f;
         // 旋回速度
         public float rotateSpeed = 2.0f;
+        
         private Rigidbody _rb;
         private Animator _anim;
+        private bool _nowAnimation = false;
 
         void Start()
         {
@@ -54,6 +56,10 @@ namespace UnityChan
                 if (dir == Vector3.zero)
                 {
                     _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);// 方向の入力がニュートラルの時は、y 軸方向の速度を保持する
+                }
+                else if (_nowAnimation) 
+                {
+                    //行動中は動かないように空
                 }
                 else
                 {
@@ -132,8 +138,13 @@ namespace UnityChan
         {
             _nonPlayerCharacter = true;
             walkSpeed = Vector3.zero;
-            _anim.SetFloat("Speed", walkSpeed.magnitude);
             _nav.NOPlay();
+            _anim.SetFloat("Speed", walkSpeed.magnitude);
+        }
+
+        internal void AnimationChange() 
+        {
+            _nowAnimation = !_nowAnimation;
         }
     }
 }
